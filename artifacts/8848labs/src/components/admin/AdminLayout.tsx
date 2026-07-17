@@ -33,11 +33,10 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
             key={href}
             href={href}
             onClick={onClose}
-            className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-              isActive(href)
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${isActive(href)
                 ? 'text-primary bg-primary/10'
                 : 'text-[#F5F0E8]/70 hover:text-[#F5F0E8] hover:bg-[#F5F0E8]/5'
-            }`}
+              }`}
           >
             <Icon className="h-4 w-4 shrink-0" />
             {label}
@@ -61,7 +60,8 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   }
 
   if (!user) {
-    window.location.href = '/api/auth/google';
+    const apiUrl = import.meta.env.VITE_API_URL || "";
+    window.location.href = `${apiUrl}/api/auth/google`;
     return null;
   }
 

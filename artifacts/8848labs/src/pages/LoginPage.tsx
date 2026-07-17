@@ -48,7 +48,8 @@ export default function LoginPage() {
 
         <button
           onClick={() => {
-            window.location.href = '/api/auth/google';
+             const apiUrl = import.meta.env.VITE_API_URL || "";
+             window.location.href = `${apiUrl}/api/auth/google`;
           }}
           disabled={isLoading}
           className="w-full flex items-center justify-center gap-3 rounded-lg border border-border bg-card px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-60"
