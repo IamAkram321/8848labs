@@ -1,0 +1,157 @@
+import { Router, type IRouter } from "express";
+import { eq, and } from "drizzle-orm";
+import { db, cartItemsTable, cartSessionsTable, productsTable } from "@workspace/db";
+import {
+  AddCartItemBody,
+  AddCartItemResponse,
+  UpdateCartItemParams,
+  UpdateCartItemBody,
+  UpdateCartItemResponse,
+  RemoveCartItemParams,
+  RemoveCartItemResponse,
+  GetCartResponse,
+} from "@workspace/api-zod";
+
+const CART_SESSION_COOKIE = "cart_session_id";
+
+async function getOrCreateSession(sessionId: string): Promise<void> {
+  const existing = await db
+    .select()
+    .from(cartSessionsTable)
+    .where(eq(cartSessionsTable.sessionId, sessionId))
+    .limit(1);
+
+  if (existing.length === 0) {
+    await db.insert(cartSessionsTable).values({ sessionId });
+  }
+}
+
+async function getCartBySession(sessionId: string) {
+  const items = await db
+    .select()
+    .from(cartItemsTable)
+    .where(eq(cartItemsTable.sessionId, sessionId));
+
+  const subtotal = items.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0);
+  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+
+  return {
+    items: items.map((item) => ({ ...item, price: Number(item.price) })),
+    subtotal,
+    itemCount,
+  };
+}
+
+const router: IRouter = Router();
+
+router.get("/cart", async (req, res): Promise<void> => {
+  const sessionId = (req.cookies?.[CART_SESSION_COOKIE] as string | undefined) ?? "";
+  if (!sessionId) {
+    res.json(GetCartResponse.parse({ items: [], subtotal: 0, itemCount: 0 }));
+    return;
+  }
+  const cart = await getCartBySession(sessionId);
+  res.json(GetCartResponse.parse(cart));
+});
+
+router.post("/cart/items", async (req, res): Promise<void> => {
+  let sessionId = (req.cookies?.[CART_SESSION_COOKIE] as string | undefined) ?? "";
+  if (!sessionId) {
+    sessionId = `session_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    res.cookie(CART_SESSION_COOKIE, sessionId, { httpOnly: true, sameSite: "lax" });
+  }
+
+  await getOrCreateSession(sessionId);
+
+  const parsed = AddCartItemBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+
+  const { productId, quantity, color, material, personalization } = parsed.data;
+
+  const [product] = await db
+    .select()
+    .from(productsTable)
+    .where(eq(productsTable.id, productId))
+    .limit(1);
+
+  if (!product) {
+    res.status(404).json({ error: "Product not found" });
+    return;
+  }
+
+  const existing = await db
+    .select()
+    .from(cartItemsTable)
+    .where(and(eq(cartItemsTable.sessionId, sessionId), eq(cartItemsTable.productId, productId)))
+    .limit(1);
+
+  if (existing[0]) {
+    await db
+      .update(cartItemsTable)
+      .set({ quantity: existing[0].quantity + quantity })
+      .where(eq(cartItemsTable.id, existing[0].id));
+  } else {
+    await db.insert(cartItemsTable).values({
+      sessionId,
+      productId,
+      productName: product.name,
+      productImage: (product.images as string[])?.[0] ?? "",
+      price: product.price,
+      quantity,
+      color: color ?? null,
+      material: material ?? null,
+      personalization: personalization ?? null,
+    });
+  }
+
+  const cart = await getCartBySession(sessionId);
+  res.status(201).json(AddCartItemResponse.parse(cart));
+});
+
+router.put("/cart/items/:itemId", async (req, res): Promise<void> => {
+  const sessionId = (req.cookies?.[CART_SESSION_COOKIE] as string | undefined) ?? "";
+
+  const params = UpdateCartItemParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ error: params.error.message });
+    return;
+  }
+
+  const parsed = UpdateCartItemBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+
+  if (parsed.data.quantity <= 0) {
+    await db.delete(cartItemsTable).where(eq(cartItemsTable.id, params.data.itemId));
+  } else {
+    await db
+      .update(cartItemsTable)
+      .set({ quantity: parsed.data.quantity })
+      .where(eq(cartItemsTable.id, params.data.itemId));
+  }
+
+  const cart = await getCartBySession(sessionId);
+  res.json(UpdateCartItemResponse.parse(cart));
+});
+
+router.delete("/cart/items/:itemId", async (req, res): Promise<void> => {
+  const sessionId = (req.cookies?.[CART_SESSION_COOKIE] as string | undefined) ?? "";
+
+  const params = RemoveCartItemParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ error: params.error.message });
+    return;
+  }
+
+  await db.delete(cartItemsTable).where(eq(cartItemsTable.id, params.data.itemId));
+
+  const cart = await getCartBySession(sessionId);
+  res.json(RemoveCartItemResponse.parse(cart));
+});
+
+export default router;
