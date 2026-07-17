@@ -6,31 +6,12 @@ import { defineConfig, loadEnv, type UserConfig } from 'vite';
 import runtimeErrorOverlay from '@replit/vite-plugin-runtime-error-modal';
 
 export default defineConfig(async ({ mode }): Promise<UserConfig> => {
-  // Load .env / .env.local from this package's root and merge with process.env,
-  // so PORT/BASE_PATH work whether they came from a .env file or the shell.
+  // Load .env / .env.local from this package's root and merge with process.env.
   const env = { ...process.env, ...loadEnv(mode, process.cwd(), '') };
 
-  const rawPort = env.PORT;
-
-  if (!rawPort) {
-    throw new Error(
-      'PORT environment variable is required but was not provided.',
-    );
-  }
-
-  const port = Number(rawPort);
-
-  if (Number.isNaN(port) || port <= 0) {
-    throw new Error(`Invalid PORT value: "${rawPort}"`);
-  }
-
-  const basePath = env.BASE_PATH;
-
-  if (!basePath) {
-    throw new Error(
-      'BASE_PATH environment variable is required but was not provided.',
-    );
-  }
+  // Default values for local development and cloud builds.
+  const port = Number(env.PORT || 5173);
+  const basePath = env.BASE_PATH || "/";
 
   return {
     base: basePath,
@@ -87,7 +68,6 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
         strict: true,
       },
 
-      // Forward frontend /api requests to the local Express backend.
       proxy: {
         '/api': {
           target: 'http://localhost:3000',
