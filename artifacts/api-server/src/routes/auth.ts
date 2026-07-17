@@ -6,16 +6,16 @@ import { eq } from "drizzle-orm";
 
 const router = Router();
 
-function getCallbackURL(): string {
-  if (process.env.APP_BASE_URL) return `${process.env.APP_BASE_URL}/api/auth/google/callback`;
-  if (process.env.REPLIT_DEV_DOMAIN) return `https://${process.env.REPLIT_DEV_DOMAIN}/api/auth/google/callback`;
-  return "http://localhost:8080/api/auth/google/callback";
+function getBackendURL(): string {
+  return process.env.BACKEND_URL || "http://localhost:8080";
 }
 
 function getFrontendURL(): string {
-  if (process.env.APP_BASE_URL) return process.env.APP_BASE_URL;
-  if (process.env.REPLIT_DEV_DOMAIN) return `https://${process.env.REPLIT_DEV_DOMAIN}`;
-  return "http://localhost:5173";
+  return process.env.FRONTEND_URL || "http://localhost:5173";
+}
+
+function getCallbackURL(): string {
+  return `${getBackendURL()}/api/auth/google/callback`;
 }
 
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
