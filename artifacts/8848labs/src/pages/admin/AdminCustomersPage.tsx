@@ -4,6 +4,7 @@ import { useLocation } from 'wouter';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
+import { API_URL } from '@/lib/api-url';
 
 export default function AdminCustomersPage() {
   const [, navigate] = useLocation();
@@ -21,7 +22,7 @@ export default function AdminCustomersPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['admin-customers', debouncedSearch],
     queryFn: async () => {
-      const res = await fetch(`/api/admin/customers?${params}`, { credentials: 'include' });
+      const res = await fetch(`${API_URL}/api/admin/customers?${params}`, { credentials: 'include' });
       if (!res.ok) throw new Error('Failed');
       return res.json();
     },

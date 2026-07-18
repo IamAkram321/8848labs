@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Download } from 'lucide-react';
+import { API_URL } from '@/lib/api-url';
 
 const CUSTOM_REQUEST_STATUSES = ['pending', 'under_review', 'quotation_sent', 'approved', 'in_production', 'completed', 'cancelled'];
 
@@ -46,7 +47,7 @@ export default function AdminCustomRequestDetailPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['admin-custom-request', id],
     queryFn: async () => {
-      const res = await fetch(`/api/admin/custom-requests/${id}`, { credentials: 'include' });
+      const res = await fetch(`${API_URL}/api/admin/custom-requests/${id}`, { credentials: 'include' });
       if (!res.ok) throw new Error('Failed to fetch request');
       return res.json();
     },
@@ -66,7 +67,7 @@ export default function AdminCustomRequestDetailPage() {
       const body: any = { status };
       if (internalNotes !== undefined) body.internalNotes = internalNotes;
       if (quotationPrice !== '') body.quotationPrice = Number(quotationPrice);
-      const res = await fetch(`/api/admin/custom-requests/${id}`, {
+      const res = await fetch(`${API_URL}/api/admin/custom-requests/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

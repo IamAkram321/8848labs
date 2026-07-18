@@ -3,6 +3,7 @@ import { useLocation, useParams } from 'wouter';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import { API_URL } from '@/lib/api-url';
 
 const statusColors: Record<string, string> = {
   pending: 'bg-yellow-100 text-yellow-800',
@@ -28,7 +29,7 @@ export default function AdminCustomerDetailPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['admin-customer', id],
     queryFn: async () => {
-      const res = await fetch(`/api/admin/customers/${id}`, { credentials: 'include' });
+      const res = await fetch(`${API_URL}/api/admin/customers/${id}`, { credentials: 'include' });
       if (!res.ok) throw new Error('Failed');
       return res.json();
     },

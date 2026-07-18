@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { ShoppingBag, Users, Package, TrendingUp, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
 import { Link } from 'wouter';
+import { API_URL } from '@/lib/api-url';
 
 const statusColors: Record<string, string> = {
   pending: 'bg-yellow-100 text-yellow-800',
@@ -43,7 +44,7 @@ export default function AdminDashboardPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['admin-dashboard'],
     queryFn: async () => {
-      const res = await fetch('/api/admin/dashboard', { credentials: 'include' });
+      const res = await fetch(`${API_URL}/api/admin/dashboard`, { credentials: 'include' });
       if (!res.ok) throw new Error('Failed to fetch dashboard');
       return res.json();
     },
@@ -75,7 +76,7 @@ export default function AdminDashboardPage() {
             {/* Low Stock Warning */}
             {(data?.products?.lowStock ?? 0) > 0 && (
               <div className="flex items-center gap-3 bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg">
-                <AlertTriangle className="h-5 w-5 flex-shrink-0" />
+                <AlertTriangle className="h-5 w-5 shrink-0" />
                 <span className="text-sm font-medium">
                   {data.products.lowStock} product{data.products.lowStock > 1 ? 's are' : ' is'} low in stock
                 </span>

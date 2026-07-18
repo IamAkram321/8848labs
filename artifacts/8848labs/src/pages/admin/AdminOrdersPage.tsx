@@ -5,6 +5,7 @@ import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, Eye } from 'lucide-react';
+import { API_URL } from '@/lib/api-url';
 
 const STATUS_TABS = ['all', 'pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'];
 
@@ -43,7 +44,7 @@ export default function AdminOrdersPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['admin-orders', activeTab, debouncedSearch],
     queryFn: async () => {
-      const res = await fetch(`/api/admin/orders?${params}`, { credentials: 'include' });
+      const res = await fetch(`${API_URL}/api/admin/orders?${params}`, { credentials: 'include' });
       if (!res.ok) throw new Error('Failed to fetch orders');
       return res.json();
     },

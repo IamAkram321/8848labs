@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Pencil, Trash2, Layers, Upload, X } from 'lucide-react';
+import { API_URL } from '@/lib/api-url';
 
 interface CollectionForm {
   name: string;
@@ -38,7 +39,7 @@ export default function AdminCollectionsPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['admin-collections'],
     queryFn: async () => {
-      const res = await fetch('/api/admin/collections', { credentials: 'include' });
+      const res = await fetch(`${API_URL}/api/admin/collections`, { credentials: 'include' });
       if (!res.ok) throw new Error('Failed');
       return res.json();
     },
@@ -47,7 +48,7 @@ export default function AdminCollectionsPage() {
   const { data: productsData } = useQuery({
     queryKey: ['admin-products-picker'],
     queryFn: async () => {
-      const res = await fetch('/api/admin/products-picker', { credentials: 'include' });
+      const res = await fetch(`${API_URL}/api/admin/products-picker`, { credentials: 'include' });
       if (!res.ok) throw new Error('Failed');
       return res.json();
     },
@@ -66,7 +67,7 @@ export default function AdminCollectionsPage() {
       const body = new FormData();
       body.append('files', file);
 
-      const res = await fetch('/api/uploads', {
+      const res = await fetch(`${API_URL}/api/uploads`, {
         method: 'POST',
         credentials: 'include',
         body,
@@ -97,7 +98,7 @@ export default function AdminCollectionsPage() {
 
   const createCollection = useMutation({
     mutationFn: async (body: any) => {
-      const res = await fetch('/api/admin/collections', {
+      const res = await fetch(`${API_URL}/api/admin/collections`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -116,7 +117,7 @@ export default function AdminCollectionsPage() {
 
   const updateCollection = useMutation({
     mutationFn: async ({ id, body }: { id: number; body: any }) => {
-      const res = await fetch(`/api/admin/collections/${id}`, {
+      const res = await fetch(`${API_URL}/api/admin/collections/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -135,7 +136,7 @@ export default function AdminCollectionsPage() {
 
   const deleteCollection = useMutation({
     mutationFn: async (id: number) => {
-      const res = await fetch(`/api/admin/collections/${id}`, {
+      const res = await fetch(`${API_URL}/api/admin/collections/${id}`, {
         method: 'DELETE',
         credentials: 'include',
       });

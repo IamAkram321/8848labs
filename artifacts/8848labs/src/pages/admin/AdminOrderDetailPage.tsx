@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft } from 'lucide-react';
+import { API_URL } from '@/lib/api-url';
 
 const ORDER_STATUSES = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'];
 
@@ -36,7 +37,7 @@ export default function AdminOrderDetailPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['admin-order', id],
     queryFn: async () => {
-      const res = await fetch(`/api/admin/orders/${id}`, { credentials: 'include' });
+      const res = await fetch(`${API_URL}/api/admin/orders/${id}`, { credentials: 'include' });
       if (!res.ok) throw new Error('Failed to fetch order');
       return res.json();
     },
@@ -50,7 +51,7 @@ export default function AdminOrderDetailPage() {
 
   const updateStatus = useMutation({
     mutationFn: async (status: string) => {
-      const res = await fetch(`/api/admin/orders/${id}/status`, {
+      const res = await fetch(`${API_URL}/api/admin/orders/${id}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

@@ -4,6 +4,7 @@ import { useGetCart } from '@workspace/api-client-react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { API_URL } from '@/lib/api-url';
 
 export default function CheckoutPage() {
   const [, navigate] = useLocation();
@@ -36,7 +37,7 @@ export default function CheckoutPage() {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch('/api/orders', {
+      const res = await fetch(`${API_URL}/api/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

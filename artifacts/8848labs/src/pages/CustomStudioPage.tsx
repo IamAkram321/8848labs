@@ -4,6 +4,7 @@ import { Upload, X, Check, ChevronRight, ArrowLeft, FileText } from 'lucide-reac
 import { useCreateCustomOrder } from '@workspace/api-client-react';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { useToast } from '@/hooks/use-toast';
+import { API_URL } from '@/lib/api-url';
 import { Link } from 'wouter';
 
 const ALLOWED_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.stl', '.3mf', '.obj'];
@@ -46,7 +47,7 @@ export default function CustomStudioPage() {
       const body = new FormData();
       valid.forEach((file) => body.append('files', file));
 
-      const res = await fetch('/api/uploads', {
+      const res = await fetch(`${API_URL}/api/uploads`, {
         method: 'POST',
         credentials: 'include',
         body,

@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Search, Plus, Pencil, Trash2, Package, Upload, X } from 'lucide-react';
+import { API_URL } from '@/lib/api-url';
 
 interface ProductForm {
   name: string;
@@ -58,7 +59,7 @@ export default function AdminProductsPage() {
       const body = new FormData();
       selected.forEach((file) => body.append('files', file));
 
-      const res = await fetch('/api/uploads', {
+      const res = await fetch(`${API_URL}/api/uploads`, {
         method: 'POST',
         credentials: 'include',
         body,
@@ -94,7 +95,7 @@ export default function AdminProductsPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['admin-products', debouncedSearch, lowStock],
     queryFn: async () => {
-      const res = await fetch(`/api/admin/products?${params}`, { credentials: 'include' });
+      const res = await fetch(`${API_URL}/api/admin/products?${params}`, { credentials: 'include' });
       if (!res.ok) throw new Error('Failed');
       return res.json();
     },
@@ -102,7 +103,7 @@ export default function AdminProductsPage() {
 
   const createProduct = useMutation({
     mutationFn: async (body: any) => {
-      const res = await fetch('/api/admin/products', {
+      const res = await fetch(`${API_URL}/api/admin/products`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -121,7 +122,7 @@ export default function AdminProductsPage() {
 
   const updateProduct = useMutation({
     mutationFn: async ({ id, body }: { id: number; body: any }) => {
-      const res = await fetch(`/api/admin/products/${id}`, {
+      const res = await fetch(`${API_URL}/api/admin/products/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -140,7 +141,7 @@ export default function AdminProductsPage() {
 
   const deleteProduct = useMutation({
     mutationFn: async (id: number) => {
-      const res = await fetch(`/api/admin/products/${id}`, { method: 'DELETE', credentials: 'include' });
+      const res = await fetch(`${API_URL}/api/admin/products/${id}`, { method: 'DELETE', credentials: 'include' });
       if (!res.ok) throw new Error('Failed');
       return res.json();
     },

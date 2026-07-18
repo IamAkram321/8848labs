@@ -5,6 +5,7 @@ import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, Eye } from 'lucide-react';
+import { API_URL } from '@/lib/api-url';
 
 const STATUS_TABS = ['all', 'pending', 'under_review', 'quotation_sent', 'approved', 'in_production', 'completed', 'cancelled'];
 
@@ -44,7 +45,7 @@ export default function AdminCustomRequestsPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['admin-custom-requests', activeTab, debouncedSearch],
     queryFn: async () => {
-      const res = await fetch(`/api/admin/custom-requests?${params}`, { credentials: 'include' });
+      const res = await fetch(`${API_URL}/api/admin/custom-requests?${params}`, { credentials: 'include' });
       if (!res.ok) throw new Error('Failed to fetch custom requests');
       return res.json();
     },
