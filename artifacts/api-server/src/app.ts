@@ -4,7 +4,6 @@ import cookieParser from "cookie-parser";
 import session from "express-session";
 import passport from "passport";
 import pinoHttp from "pino-http";
-import path from "node:path";
 import router from "./routes";
 import { logger } from "./lib/logger";
 
@@ -79,11 +78,6 @@ app.use(passport.session());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-app.use(
-  "/api/uploads",
-  express.static(path.resolve(process.cwd(), "uploads"))
-);
 
 app.use("/api", router);
 

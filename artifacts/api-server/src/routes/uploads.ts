@@ -1,40 +1,11 @@
 import { Router, type IRouter, type Request, type Response } from "express";
-import multer from "multer";
-import path from "node:path";
-import fs from "node:fs";
-import crypto from "node:crypto";
+import { createCloudinaryUploader } from "../lib/cloudinary";
 
-const UPLOAD_DIR = path.resolve(process.cwd(), "uploads", "custom-studio");
-fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-
-const ALLOWED_EXTENSIONS = new Set([".png", ".jpg", ".jpeg", ".stl", ".3mf", ".obj"]);
-const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
-
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, UPLOAD_DIR),
-  filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    const uniqueName = `${Date.now()}-${crypto.randomBytes(6).toString("hex")}${ext}`;
-    cb(null, uniqueName);
-  },
-});
-
-const upload = multer({
-  storage,
-  limits: { fileSize: MAX_FILE_SIZE },
-  fileFilter: (_req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    if (!ALLOWED_EXTENSIONS.has(ext)) {
-      cb(new Error(`Unsupported file type: ${ext || "unknown"}`));
-      return;
-    }
-    cb(null, true);
-  },
-});
+const upload = createCloudinaryUploader("8848labs/uploads");
 
 const router: IRouter = Router();
 
-/** POST /api/uploads — accepts up to 10 files, returns their public URLs */
+/** POST /api/uploads — accepts up to 10 files, uploads them to Cloudinary, returns their secure URLs */
 router.post("/uploads", (req: Request, res: Response) => {
   const handler = upload.array("files", 10);
 
@@ -51,7 +22,8 @@ router.post("/uploads", (req: Request, res: Response) => {
       return;
     }
 
-    const urls = files.map((f) => `/api/uploads/custom-studio/${f.filename}`);
+    // multer-storage-cloudinary sets `file.path` to the Cloudinary secure_url.
+    const urls = files.map((f) => f.path);
     res.status(201).json({ urls });
   });
 });
