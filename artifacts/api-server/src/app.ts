@@ -8,7 +8,7 @@ import path from "node:path";
 import router from "./routes";
 import { logger } from "./lib/logger";
 
-// Import auth module — registers passport strategies as a side-effect
+// Registers passport strategies
 import "./routes/auth";
 
 const app: Express = express();
@@ -18,37 +18,58 @@ app.use(
     logger,
     serializers: {
       req(req) {
-        return { id: req.id, method: req.method, url: req.url?.split("?")[0] };
+        return {
+          id: req.id,
+          method: req.method,
+          url: req.url?.split("?")[0],
+        };
       },
       res(res) {
-        return { statusCode: res.statusCode };
+        return {
+          statusCode: res.statusCode,
+        };
       },
     },
   })
 );
 
-// Trust proxy so secure cookies work behind Replit's reverse proxy
+// Required when running behind Render's proxy
 app.set("trust proxy", 1);
 
+// CORS
 app.use(
   cors({
-    origin: true,
+    origin: [
+      "http://localhost:5173",
+      process.env.FRONTEND_URL!,
+    ],
     credentials: true,
   })
 );
 
 app.use(cookieParser());
 
+// Session
 app.use(
   session({
-    secret: process.env.SESSION_SECRET ?? "fallback-dev-secret-change-me",
+    secret:
+      process.env.SESSION_SECRET ??
+      "fallback-dev-secret-change-me",
+
     resave: false,
     saveUninitialized: false,
+
+    proxy: true,
+    name: "connect.sid",
+
     cookie: {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      sameSite:
+        process.env.NODE_ENV === "production"
+          ? "none"
+          : "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     },
   })
 );
@@ -59,7 +80,10 @@ app.use(passport.session());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/api/uploads", express.static(path.resolve(process.cwd(), "uploads")));
+app.use(
+  "/api/uploads",
+  express.static(path.resolve(process.cwd(), "uploads"))
+);
 
 app.use("/api", router);
 

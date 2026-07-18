@@ -23,12 +23,16 @@ const AuthContext = createContext<AuthContextType>({
   logout: async () => {},
 });
 
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/auth/me', { credentials: 'include' })
+    fetch(`${API_URL}/api/auth/me`, {
+      credentials: 'include',
+    })
       .then((res) => {
         if (res.ok) return res.json();
         return null;
@@ -41,14 +45,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    await fetch(`${API_URL}/api/auth/logout`, {
+      method: 'POST',
+      credentials: 'include',
+    });
     window.location.href = '/';
   };
 
   const isAdmin = user?.role === 'ADMIN';
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, isAdmin, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isLoading,
+        isAdmin,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

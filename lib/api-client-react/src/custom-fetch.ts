@@ -360,7 +360,14 @@ export async function customFetch<T = unknown>(
 
   const requestInfo = { method, url: resolveUrl(input) };
 
-  const response = await fetch(input, { ...init, method, headers });
+  // Default to sending cookies on every request (needed cross-site once the
+  // frontend and backend live on different domains, e.g. Vercel + Render).
+  // A caller-supplied `credentials` option (including on a Request object)
+  // still wins over this default.
+  const credentials: RequestCredentials =
+    init.credentials ?? (isRequest(input) ? input.credentials : undefined) ?? "include";
+
+  const response = await fetch(input, { ...init, method, headers, credentials });
 
   if (!response.ok) {
     const errorData = await parseErrorBody(response, method);

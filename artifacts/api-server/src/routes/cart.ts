@@ -14,6 +14,13 @@ import {
 
 const CART_SESSION_COOKIE = "cart_session_id";
 
+const CART_COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: (process.env.NODE_ENV === "production" ? "none" : "lax") as "none" | "lax",
+  maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+};
+
 async function getOrCreateSession(sessionId: string): Promise<void> {
   const existing = await db
     .select()
@@ -58,7 +65,7 @@ router.post("/cart/items", async (req, res): Promise<void> => {
   let sessionId = (req.cookies?.[CART_SESSION_COOKIE] as string | undefined) ?? "";
   if (!sessionId) {
     sessionId = `session_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-    res.cookie(CART_SESSION_COOKIE, sessionId, { httpOnly: true, sameSite: "lax" });
+    res.cookie(CART_SESSION_COOKIE, sessionId, CART_COOKIE_OPTIONS);
   }
 
   await getOrCreateSession(sessionId);
