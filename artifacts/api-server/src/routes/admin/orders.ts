@@ -3,6 +3,7 @@ import { db, ordersTable, orderItemsTable } from "@workspace/db";
 import type { Order } from "@workspace/db";
 import { eq, desc, sql } from "drizzle-orm";
 import { requireAdmin } from "../../middleware/requireAuth";
+import { sendOrderStatusUpdateEmail } from "../../lib/email";
 
 const router = Router();
 const VALID_STATUSES = ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"];
@@ -69,6 +70,10 @@ router.put("/orders/:id/status", requireAdmin, async (req: Request, res: Respons
       .returning();
 
     if (!updated.length) { res.status(404).json({ error: "Order not found" }); return; }
+
+    // Fire-and-forget: a failed email should never fail the status update itself.
+    void sendOrderStatusUpdateEmail(updated[0]);
+
     res.json({ order: updated[0] });
   } catch (err) {
     console.error("[admin/orders/:id/status]", err);

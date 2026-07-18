@@ -22,6 +22,8 @@ import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
+import OrdersPage from './pages/OrdersPage';
+import OrderTrackingPage from './pages/OrderTrackingPage';
 import LoginPage from './pages/LoginPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsPage from './pages/TermsPage';
@@ -88,6 +90,8 @@ function AppContent() {
           <Route path="/contact" component={ContactPage} />
           <Route path="/cart" component={CartPage} />
           <Route path="/checkout" component={CheckoutPage} />
+          <Route path="/orders" component={OrdersPage} />
+          <Route path="/orders/:id" component={OrderTrackingPage} />
           <Route path="/login" component={LoginPage} />
           <Route path="/privacy-policy" component={PrivacyPolicyPage} />
           <Route path="/terms" component={TermsPage} />

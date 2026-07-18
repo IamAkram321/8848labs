@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ShoppingBag, User, LogOut } from "lucide-react";
+import { Menu, X, ShoppingBag, User, LogOut, Package } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useCart } from "../../context/CartContext";
 import { useAuth } from "../../context/AuthContext";
@@ -99,6 +99,14 @@ export function Navbar() {
                       className="absolute right-0 mt-3 w-48 rounded-lg border border-border bg-card shadow-lg py-2"
                     >
                       <div className="px-4 py-2 text-sm text-foreground truncate">{user.name}</div>
+                      <Link
+                        href="/orders"
+                        onClick={() => setIsAccountMenuOpen(false)}
+                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground hover:text-primary hover:bg-muted transition-colors"
+                      >
+                        <Package className="w-4 h-4" />
+                        My Orders
+                      </Link>
                       <button
                         onClick={() => {
                           setIsAccountMenuOpen(false);
@@ -161,13 +169,22 @@ export function Navbar() {
               ))}
               <div className="border-b border-border/50 pb-4">
                 {user ? (
-                  <button
-                    onClick={logout}
-                    className="flex items-center gap-2 text-2xl font-serif text-foreground hover:text-primary transition-colors"
-                  >
-                    <LogOut className="w-5 h-5" />
-                    Sign out
-                  </button>
+                  <div className="space-y-4">
+                    <Link
+                      href="/orders"
+                      className="flex items-center gap-2 text-2xl font-serif text-foreground hover:text-primary transition-colors"
+                    >
+                      <Package className="w-5 h-5" />
+                      My Orders
+                    </Link>
+                    <button
+                      onClick={logout}
+                      className="flex items-center gap-2 text-2xl font-serif text-foreground hover:text-primary transition-colors"
+                    >
+                      <LogOut className="w-5 h-5" />
+                      Sign out
+                    </button>
+                  </div>
                 ) : (
                   <Link
                     href="/login"
