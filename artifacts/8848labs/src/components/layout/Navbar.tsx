@@ -35,7 +35,7 @@ export function Navbar() {
     { label: "Collections", path: "/collections" },
     { label: "Custom Studio", path: "/custom-studio" },
     { label: "Projects", path: "/projects" },
-    { label: "Journal", path: "/journal" },
+    // { label: "Journal", path: "/journal" },
     { label: "About", path: "/about" },
   ];
 

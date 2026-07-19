@@ -21,6 +21,7 @@ export const productsTable = pgTable("products", {
   shortDescription: text("short_description").notNull().default(""),
   category: text("category").notNull(),
   images: jsonb("images").$type<string[]>().notNull().default([]),
+  model3dUrl: text("model_3d_url"),
   materials: jsonb("materials").$type<string[]>().notNull().default([]),
   colors: jsonb("colors").$type<string[]>().notNull().default([]),
   dimensions: text("dimensions"),

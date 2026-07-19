@@ -21,6 +21,7 @@ interface ProductForm {
   inStock: boolean;
   featured: boolean;
   images: string[];
+  model3dUrl: string;
 }
 
 const emptyForm: ProductForm = {
@@ -34,6 +35,7 @@ const emptyForm: ProductForm = {
   inStock: true,
   featured: false,
   images: [],
+  model3dUrl: '',
 };
 
 export default function AdminProductsPage() {
@@ -47,7 +49,39 @@ export default function AdminProductsPage() {
   const [form, setForm] = useState<ProductForm>(emptyForm);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [isUploadingModel, setIsUploadingModel] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const modelInputRef = useRef<HTMLInputElement>(null);
+
+  const handleModelSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    setIsUploadingModel(true);
+    try {
+      const body = new FormData();
+      body.append('files', file);
+
+      const res = await fetch(`${API_URL}/api/uploads`, {
+        method: 'POST',
+        credentials: 'include',
+        body,
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast({ title: data.error ?? '3D model upload failed', variant: 'destructive' });
+        return;
+      }
+
+      setForm((prev) => ({ ...prev, model3dUrl: data.urls[0] }));
+    } catch {
+      toast({ title: '3D model upload failed. Please try again.', variant: 'destructive' });
+    } finally {
+      setIsUploadingModel(false);
+    }
+  };
 
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = Array.from(e.target.files ?? []);
@@ -172,6 +206,7 @@ export default function AdminProductsPage() {
       inStock: product.inStock ?? true,
       featured: product.featured ?? false,
       images: Array.isArray(product.images) ? product.images : [],
+      model3dUrl: product.model3dUrl ?? '',
     });
     setDialogOpen(true);
   };
@@ -188,6 +223,7 @@ export default function AdminProductsPage() {
       inStock: form.inStock,
       featured: form.featured,
       images: form.images,
+      model3dUrl: form.model3dUrl || null,
     };
     if (editProduct) {
       updateProduct.mutate({ id: editProduct.id, body });
@@ -331,6 +367,45 @@ export default function AdminProductsPage() {
                       </button>
                     </div>
                   ))}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-sm font-medium">3D Model (optional)</label>
+              <p className="text-xs text-muted-foreground -mt-0.5 mb-1">
+                Lets customers rotate a real 3D preview on the product page. Accepts STL, OBJ, or 3MF.
+              </p>
+              <input
+                ref={modelInputRef}
+                type="file"
+                accept=".stl,.obj,.3mf"
+                className="hidden"
+                onChange={handleModelSelect}
+              />
+              {form.model3dUrl ? (
+                <div className="flex items-center justify-between border border-border rounded-lg px-4 py-3">
+                  <div className="flex items-center gap-2 text-sm text-foreground truncate">
+                    <Package className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    <span className="truncate">{form.model3dUrl.split('/').pop()}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setForm((prev) => ({ ...prev, model3dUrl: '' }))}
+                    className="text-muted-foreground hover:text-destructive transition-colors shrink-0"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ) : (
+                <div
+                  onClick={() => modelInputRef.current?.click()}
+                  className="border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:bg-muted/50 transition-colors"
+                >
+                  <Upload className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">
+                    {isUploadingModel ? 'Uploading...' : 'Click to upload a 3D model file'}
+                  </p>
                 </div>
               )}
             </div>

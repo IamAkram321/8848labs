@@ -47,6 +47,7 @@ router.post("/products", requireAdmin, async (req: Request, res: Response): Prom
       shortDescription: String(body.shortDescription ?? ""),
       category: String(body.category),
       images: (body.images as string[]) ?? [],
+      model3dUrl: body.model3dUrl ? String(body.model3dUrl) : null,
       materials: (body.materials as string[]) ?? [],
       colors: (body.colors as string[]) ?? [],
       dimensions: String(body.dimensions ?? ""),
@@ -78,7 +79,7 @@ router.put("/products/:id", requireAdmin, async (req: Request, res: Response): P
 
     const body = req.body as Record<string, unknown>;
     const allowed = ["name","price","compareAtPrice","description","shortDescription","category",
-      "images","materials","colors","dimensions","weight","printTime","inStock","stock",
+      "images","model3dUrl","materials","colors","dimensions","weight","printTime","inStock","stock",
       "featured","tags","customizable","rating","reviewCount"];
 
     const patch: Record<string, unknown> = {};

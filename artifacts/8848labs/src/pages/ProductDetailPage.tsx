@@ -4,10 +4,13 @@ import { useState } from 'react';
 import { useCart } from '@/context/CartContext';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
+import { ProductModelViewer } from '@/components/three/ProductModelViewer';
+import { View } from 'lucide-react';
 
 export default function ProductDetailPage() {
   const { slug } = useParams();
   const [selectedImage, setSelectedImage] = useState(0);
+  const [viewMode, setViewMode] = useState<'photos' | '3d'>('photos');
   const [quantity, setQuantity] = useState(1);
   const [selectedMaterial, setSelectedMaterial] = useState('');
 
@@ -76,25 +79,58 @@ export default function ProductDetailPage() {
           
           {/* Images */}
           <div className="space-y-4">
-            <div className="bg-card aspect-4/5 border border-border relative overflow-hidden">
-              <img 
-                src={displayProduct.images[selectedImage]} 
-                alt={displayProduct.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            {displayProduct.images.length > 1 && (
-              <div className="grid grid-cols-4 gap-4">
-                {displayProduct.images.map((img, i) => (
-                  <button 
-                    key={i} 
-                    onClick={() => setSelectedImage(i)}
-                    className={`aspect-square border ${selectedImage === i ? 'border-primary' : 'border-border'} bg-card overflow-hidden`}
-                  >
-                    <img src={img} className="w-full h-full object-cover" alt="" />
-                  </button>
-                ))}
+            {displayProduct.model3dUrl && (
+              <div className="flex gap-2 mb-2">
+                <button
+                  onClick={() => setViewMode('photos')}
+                  className={`flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-widest transition-colors ${
+                    viewMode === 'photos' ? 'bg-foreground text-background' : 'bg-card border border-border text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  Photos
+                </button>
+                <button
+                  onClick={() => setViewMode('3d')}
+                  className={`flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-widest transition-colors ${
+                    viewMode === '3d' ? 'bg-foreground text-background' : 'bg-card border border-border text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <View className="w-3.5 h-3.5" />
+                  3D View
+                </button>
               </div>
+            )}
+
+            {viewMode === '3d' && displayProduct.model3dUrl ? (
+              <div className="bg-card aspect-4/5 border border-border relative overflow-hidden">
+                <ProductModelViewer url={displayProduct.model3dUrl} />
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-widest text-muted-foreground bg-background/80 px-3 py-1 rounded-full pointer-events-none">
+                  Drag to rotate &middot; Scroll to zoom
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="bg-card aspect-4/5 border border-border relative overflow-hidden">
+                  <img 
+                    src={displayProduct.images[selectedImage]} 
+                    alt={displayProduct.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                {displayProduct.images.length > 1 && (
+                  <div className="grid grid-cols-4 gap-4">
+                    {displayProduct.images.map((img, i) => (
+                      <button 
+                        key={i} 
+                        onClick={() => setSelectedImage(i)}
+                        className={`aspect-square border ${selectedImage === i ? 'border-primary' : 'border-border'} bg-card overflow-hidden`}
+                      >
+                        <img src={img} className="w-full h-full object-cover" alt="" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </div>
 
