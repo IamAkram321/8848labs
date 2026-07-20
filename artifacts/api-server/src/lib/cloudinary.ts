@@ -33,6 +33,7 @@ const RAW_DOCUMENT_EXTENSIONS = new Set([
   ".stl",
   ".3mf",
   ".obj",
+  ".glb",
   ".step",
   ".stp",
   ".zip",

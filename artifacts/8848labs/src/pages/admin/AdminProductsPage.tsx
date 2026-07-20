@@ -374,12 +374,12 @@ export default function AdminProductsPage() {
             <div className="space-y-1">
               <label className="text-sm font-medium">3D Model (optional)</label>
               <p className="text-xs text-muted-foreground -mt-0.5 mb-1">
-                Lets customers rotate a real 3D preview on the product page. Accepts STL, OBJ, or 3MF.
+                Lets customers rotate a real 3D preview on the product page. Accepts STL, OBJ, GLB, or 3MF.
               </p>
               <input
                 ref={modelInputRef}
                 type="file"
-                accept=".stl,.obj,.3mf"
+                accept=".stl,.obj,.3mf,.glb"
                 className="hidden"
                 onChange={handleModelSelect}
               />

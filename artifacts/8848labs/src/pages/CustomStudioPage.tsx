@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { API_URL } from '@/lib/api-url';
 import { Link } from 'wouter';
 
-const ALLOWED_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.stl', '.3mf', '.obj'];
+const ALLOWED_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.stl', '.3mf', '.obj', '.glb'];
 
 function isAllowedFile(file: File) {
   const name = file.name.toLowerCase();
@@ -202,7 +202,7 @@ export default function CustomStudioPage() {
                     ref={fileInputRef}
                     type="file"
                     multiple
-                    accept=".png,.jpg,.jpeg,.stl,.3mf,.obj"
+                    accept=".png,.jpg,.jpeg,.stl,.3mf,.obj,.glb"
                     className="hidden"
                     onChange={handleFileInputChange}
                   />
@@ -220,7 +220,7 @@ export default function CustomStudioPage() {
                     <p className="font-medium mb-2">
                       {isUploading ? 'Uploading...' : 'Drag and drop files here, or click to browse'}
                     </p>
-                    <p className="text-xs text-muted-foreground">Supported: PNG, JPG, STL, 3MF, OBJ (Max 50MB per file)</p>
+                    <p className="text-xs text-muted-foreground">Supported: PNG, JPG, STL, 3MF, OBJ, GLB (Max 50MB per file)</p>
                   </div>
 
                   {files.length > 0 && (

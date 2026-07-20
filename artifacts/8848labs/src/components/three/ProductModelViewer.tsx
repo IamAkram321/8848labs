@@ -3,6 +3,7 @@ import { Canvas, useLoader } from '@react-three/fiber';
 import { Environment, OrbitControls, ContactShadows, Html } from '@react-three/drei';
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as THREE from 'three';
 
 // Matches the bronze/gold material used on the homepage hero (HeroScene.tsx)
@@ -65,6 +66,41 @@ function ObjModel({ url }: { url: string }) {
   // (outer group) — composing these as separate nodes keeps the math correct,
   // since applying both to one object's transform at once would scale the
   // centering offset too.
+  return (
+    <group scale={scale}>
+      <primitive object={model} position={offset} />
+    </group>
+  );
+}
+
+function GlbModel({ url }: { url: string }) {
+  const gltf = useLoader(GLTFLoader, url);
+
+  // Unlike STL/OBJ (which usually carry no material data at all), GLB files
+  // typically already include real, artist-authored materials, colors, and
+  // even textures. Overriding those with the flat bronze material would
+  // throw away exactly what makes GLB worth supporting — so here we only
+  // center and normalize scale, and leave appearance untouched.
+  const { model, scale, offset } = useMemo(() => {
+    const clone = gltf.scene.clone(true);
+    const box = new THREE.Box3().setFromObject(clone);
+    const size = new THREE.Vector3();
+    const center = new THREE.Vector3();
+    box.getSize(size);
+    box.getCenter(center);
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const scaleFactor = maxDim > 0 ? TARGET_SIZE / maxDim : 1;
+
+    clone.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+      }
+    });
+
+    return { model: clone, scale: scaleFactor, offset: center.multiplyScalar(-1) };
+  }, [gltf]);
+
   return (
     <group scale={scale}>
       <primitive object={model} position={offset} />
@@ -136,7 +172,7 @@ interface ProductModelViewerProps {
 export function ProductModelViewer({ url }: ProductModelViewerProps) {
   const extension = url.split('.').pop()?.toLowerCase() ?? '';
 
-  if (extension !== 'stl' && extension !== 'obj') {
+  if (extension !== 'stl' && extension !== 'obj' && extension !== 'glb') {
     return <UnsupportedFormat url={url} extension={extension} />;
   }
 
@@ -149,7 +185,9 @@ export function ProductModelViewer({ url }: ProductModelViewerProps) {
         <spotLight position={[-5, 5, -5]} intensity={0.8} color="#FFD700" />
 
         <Suspense fallback={<Loader />}>
-          {extension === 'stl' ? <StlModel url={url} /> : <ObjModel url={url} />}
+          {extension === 'stl' && <StlModel url={url} />}
+          {extension === 'obj' && <ObjModel url={url} />}
+          {extension === 'glb' && <GlbModel url={url} />}
           <Environment preset="studio" />
         </Suspense>
 
