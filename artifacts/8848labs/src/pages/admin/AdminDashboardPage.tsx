@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { ShoppingBag, Users, Package, TrendingUp, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
 import { Link } from 'wouter';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { API_URL } from '@/lib/api-url';
 
 const statusColors: Record<string, string> = {
@@ -26,17 +27,90 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-function StatCard({ title, value, icon: Icon, color }: { title: string; value: string | number; icon: any; color: string }) {
+function StatCard({
+  title,
+  value,
+  icon: Icon,
+  emphasis = false,
+}: {
+  title: string;
+  value: string | number;
+  icon: any;
+  emphasis?: boolean;
+}) {
   return (
-    <div className="bg-card border border-border rounded-lg p-5 flex items-center gap-4">
-      <div className={`p-3 rounded-lg ${color}`}>
-        <Icon className="h-5 w-5" />
-      </div>
-      <div>
-        <p className="text-sm text-muted-foreground">{title}</p>
-        <p className="text-2xl font-serif font-semibold text-foreground">{value}</p>
-      </div>
+    <div
+      className={`relative overflow-hidden rounded-lg border p-5 ${
+        emphasis ? 'bg-[#1A1714] border-[#1A1714] text-[#F5F0E8]' : 'bg-card border-border text-foreground'
+      }`}
+    >
+      <Icon className={`absolute -right-2 -bottom-2 h-16 w-16 ${emphasis ? 'text-primary/20' : 'text-muted-foreground/10'}`} />
+      <p className={`text-xs uppercase tracking-widest mb-2 relative ${emphasis ? 'text-[#F5F0E8]/60' : 'text-muted-foreground'}`}>
+        {title}
+      </p>
+      <p className="text-3xl font-serif relative">{value}</p>
     </div>
+  );
+}
+
+interface TrendPoint {
+  date: string;
+  revenue: number;
+  orders: number;
+}
+
+function RevenueTooltip({ active, payload, label }: any) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="bg-[#1A1714] text-[#F5F0E8] px-4 py-3 rounded-md text-xs shadow-lg">
+      <p className="text-[#F5F0E8]/60 mb-1">
+        {new Date(label).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+      </p>
+      <p className="font-serif text-sm">NPR {Number(payload[0]?.value ?? 0).toLocaleString()}</p>
+      <p className="text-[#F5F0E8]/60">{payload[1]?.value ?? 0} order{payload[1]?.value === 1 ? '' : 's'}</p>
+    </div>
+  );
+}
+
+function RevenueTrendChart({ trend }: { trend: TrendPoint[] }) {
+  if (trend.length === 0) {
+    return (
+      <div className="h-64 flex items-center justify-center text-muted-foreground text-sm">
+        Not enough order history yet to chart a trend.
+      </div>
+    );
+  }
+
+  return (
+    <ResponsiveContainer width="100%" height={260}>
+      <AreaChart data={trend} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+        <defs>
+          <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#B8956A" stopOpacity={0.35} />
+            <stop offset="100%" stopColor="#B8956A" stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" className="text-border" />
+        <XAxis
+          dataKey="date"
+          tickFormatter={(d) => new Date(d).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+          tick={{ fontSize: 11, fill: 'currentColor' }}
+          className="text-muted-foreground"
+          axisLine={false}
+          tickLine={false}
+          minTickGap={24}
+        />
+        <YAxis
+          tick={{ fontSize: 11, fill: 'currentColor' }}
+          className="text-muted-foreground"
+          axisLine={false}
+          tickLine={false}
+          width={48}
+        />
+        <Tooltip content={<RevenueTooltip />} />
+        <Area type="monotone" dataKey="revenue" stroke="#B8956A" strokeWidth={2} fill="url(#revenueFill)" />
+      </AreaChart>
+    </ResponsiveContainer>
   );
 }
 
@@ -50,10 +124,17 @@ export default function AdminDashboardPage() {
     },
   });
 
+  const trend: TrendPoint[] = data?.trend ?? [];
+  const trendRevenue = trend.reduce((sum, d) => sum + d.revenue, 0);
+  const trendOrders = trend.reduce((sum, d) => sum + d.orders, 0);
+
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <h1 className="text-3xl font-serif text-foreground">Dashboard</h1>
+        <div>
+          <h1 className="text-3xl font-serif text-foreground">Dashboard</h1>
+          <p className="text-sm text-muted-foreground mt-1">An overview of your shop's activity.</p>
+        </div>
 
         {isLoading ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -65,12 +146,24 @@ export default function AdminDashboardPage() {
           <>
             {/* Stat Cards */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              <StatCard title="Total Orders" value={data?.orders?.total ?? 0} icon={ShoppingBag} color="bg-primary/10 text-primary" />
-              <StatCard title="Pending" value={data?.orders?.pending ?? 0} icon={Clock} color="bg-yellow-100 text-yellow-700" />
-              <StatCard title="Processing" value={data?.orders?.processing ?? 0} icon={TrendingUp} color="bg-purple-100 text-purple-700" />
-              <StatCard title="Delivered" value={data?.orders?.delivered ?? 0} icon={CheckCircle} color="bg-green-100 text-green-700" />
-              <StatCard title="Customers" value={data?.customers?.total ?? 0} icon={Users} color="bg-blue-100 text-blue-700" />
-              <StatCard title="Revenue (NPR)" value={`${Number(data?.revenue?.total ?? 0).toLocaleString()}`} icon={TrendingUp} color="bg-primary/10 text-primary" />
+              <StatCard title="Revenue (NPR)" value={Number(data?.revenue?.total ?? 0).toLocaleString()} icon={TrendingUp} emphasis />
+              <StatCard title="Total Orders" value={data?.orders?.total ?? 0} icon={ShoppingBag} />
+              <StatCard title="Pending" value={data?.orders?.pending ?? 0} icon={Clock} />
+              <StatCard title="Processing" value={data?.orders?.processing ?? 0} icon={TrendingUp} />
+              <StatCard title="Delivered" value={data?.orders?.delivered ?? 0} icon={CheckCircle} />
+              <StatCard title="Customers" value={data?.customers?.total ?? 0} icon={Users} />
+            </div>
+
+            {/* Revenue Trend Chart */}
+            <div className="bg-card border border-border rounded-lg p-6">
+              <div className="flex items-center justify-between mb-1">
+                <h2 className="font-serif text-lg text-foreground">Revenue, Last 30 Days</h2>
+                <div className="text-right">
+                  <p className="text-xs text-muted-foreground">{trendOrders} orders</p>
+                </div>
+              </div>
+              <p className="text-2xl font-serif text-foreground mb-4">NPR {trendRevenue.toLocaleString()}</p>
+              <RevenueTrendChart trend={trend} />
             </div>
 
             {/* Low Stock Warning */}

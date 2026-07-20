@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Route, Switch, Router as WouterRouter, useLocation } from 'wouter';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 import { Navbar } from './components/layout/Navbar';
@@ -44,6 +45,26 @@ import AdminReviewsPage from './pages/admin/AdminReviewsPage';
 import AdminCustomersPage from './pages/admin/AdminCustomersPage';
 import AdminCustomerDetailPage from './pages/admin/AdminCustomerDetailPage';
 
+// Subtle fade + rise between storefront pages. Kept quiet and quick —
+// this should feel like the page settling into place, not a slide show.
+// Respects prefers-reduced-motion by dropping the vertical movement and
+// shortening the duration to a near-instant crossfade.
+function PageTransition({ children, transitionKey }: { children: React.ReactNode; transitionKey: string }) {
+  const shouldReduceMotion = useReducedMotion();
+
+  return (
+    <motion.div
+      key={transitionKey}
+      initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: shouldReduceMotion ? 0 : -8 }}
+      transition={{ duration: shouldReduceMotion ? 0.15 : 0.4, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -77,31 +98,35 @@ function AppContent() {
     <div className="flex flex-col min-h-screen">
       <Navbar />
       <main className="flex-1">
-        <Switch>
-          <Route path="/" component={HomePage} />
-          <Route path="/shop" component={ShopPage} />
-          <Route path="/custom-studio" component={CustomStudioPage} />
-          <Route path="/projects" component={ProjectsPage} />
-          <Route path="/projects/:slug" component={ProjectDetailPage} />
-          <Route path="/product/:slug" component={ProductDetailPage} />
-          <Route path="/collections" component={CollectionsPage} />
-          <Route path="/collections/:slug" component={CollectionDetailPage} />
-          <Route path="/journal" component={JournalPage} />
-          <Route path="/journal/:slug" component={JournalPostPage} />
-          <Route path="/about" component={AboutPage} />
-          <Route path="/contact" component={ContactPage} />
-          <Route path="/cart" component={CartPage} />
-          <Route path="/checkout" component={CheckoutPage} />
-          <Route path="/orders" component={OrdersPage} />
-          <Route path="/orders/:id" component={OrderTrackingPage} />
-          <Route path="/login" component={LoginPage} />
-          <Route path="/privacy-policy" component={PrivacyPolicyPage} />
-          <Route path="/terms" component={TermsPage} />
-          <Route path="/faq" component={FAQPage} />
-          <Route path="/shipping" component={ShippingPage} />
-          <Route path="/returns" component={ReturnsPage} />
-          <Route component={NotFound} />
-        </Switch>
+        <AnimatePresence mode="wait" initial={false}>
+          <PageTransition transitionKey={location}>
+            <Switch location={location}>
+              <Route path="/" component={HomePage} />
+              <Route path="/shop" component={ShopPage} />
+              <Route path="/custom-studio" component={CustomStudioPage} />
+              <Route path="/projects" component={ProjectsPage} />
+              <Route path="/projects/:slug" component={ProjectDetailPage} />
+              <Route path="/product/:slug" component={ProductDetailPage} />
+              <Route path="/collections" component={CollectionsPage} />
+              <Route path="/collections/:slug" component={CollectionDetailPage} />
+              <Route path="/journal" component={JournalPage} />
+              <Route path="/journal/:slug" component={JournalPostPage} />
+              <Route path="/about" component={AboutPage} />
+              <Route path="/contact" component={ContactPage} />
+              <Route path="/cart" component={CartPage} />
+              <Route path="/checkout" component={CheckoutPage} />
+              <Route path="/orders" component={OrdersPage} />
+              <Route path="/orders/:id" component={OrderTrackingPage} />
+              <Route path="/login" component={LoginPage} />
+              <Route path="/privacy-policy" component={PrivacyPolicyPage} />
+              <Route path="/terms" component={TermsPage} />
+              <Route path="/faq" component={FAQPage} />
+              <Route path="/shipping" component={ShippingPage} />
+              <Route path="/returns" component={ReturnsPage} />
+              <Route component={NotFound} />
+            </Switch>
+          </PageTransition>
+        </AnimatePresence>
       </main>
       <Footer />
     </div>

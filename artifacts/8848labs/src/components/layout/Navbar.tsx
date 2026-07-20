@@ -35,7 +35,7 @@ export function Navbar() {
     { label: "Collections", path: "/collections" },
     { label: "Custom Studio", path: "/custom-studio" },
     { label: "Projects", path: "/projects" },
-    // { label: "Journal", path: "/journal" },
+    { label: "Journal", path: "/journal" },
     { label: "About", path: "/about" },
   ];
 
@@ -48,15 +48,23 @@ export function Navbar() {
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center space-x-8">
-          {navLinks.map((link) => (
-            <Link 
-              key={link.path} 
-              href={link.path}
-              className={`text-sm uppercase tracking-widest transition-colors hover:text-primary ${location.startsWith(link.path) ? "text-primary" : navText}`}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {navLinks.map((link) => {
+            const isActive = location.startsWith(link.path);
+            return (
+              <Link
+                key={link.path}
+                href={link.path}
+                className={`group relative text-sm uppercase tracking-widest transition-colors hover:text-primary py-1 ${isActive ? "text-primary" : navText}`}
+              >
+                {link.label}
+                <span
+                  className={`absolute left-0 -bottom-0.5 h-px bg-primary transition-transform duration-300 ease-out origin-left ${
+                    isActive ? "w-full scale-x-100" : "w-full scale-x-0 group-hover:scale-x-100"
+                  }`}
+                />
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="flex items-center space-x-6">
