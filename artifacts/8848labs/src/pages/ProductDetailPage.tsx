@@ -5,6 +5,7 @@ import { useCart } from '@/context/CartContext';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
 import { ProductModelViewer } from '@/components/three/ProductModelViewer';
+import { ProductReviews } from '@/components/ui/ProductReviews';
 import { View } from 'lucide-react';
 
 export default function ProductDetailPage() {
@@ -186,6 +187,8 @@ export default function ProductDetailPage() {
 
           </div>
         </div>
+
+        <ProductReviews productId={displayProduct.id} />
       </div>
     </div>
   );

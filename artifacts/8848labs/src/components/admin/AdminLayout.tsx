@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
-import { LayoutDashboard, ShoppingBag, Printer, Package, Layers, Users, Menu, X, LogOut } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Printer, Package, Layers, Star, Users, Menu, X, LogOut } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -11,6 +11,7 @@ const navLinks = [
   { href: '/admin/custom-requests', label: 'Custom Requests', icon: Printer },
   { href: '/admin/products', label: 'Products', icon: Package },
   { href: '/admin/collections', label: 'Collections', icon: Layers },
+  { href: '/admin/reviews', label: 'Reviews', icon: Star },
   { href: '/admin/customers', label: 'Customers', icon: Users },
 ];
 

@@ -9,6 +9,7 @@ import customOrdersRouter from "./custom-orders";
 import cartRouter from "./cart";
 import ordersRouter from "./orders";
 import uploadsRouter from "./uploads";
+import reviewsRouter from "./reviews";
 import testimonialsRouter from "./testimonials";
 import statsRouter from "./stats";
 import authRouter from "./auth";
@@ -28,6 +29,7 @@ router.use(customOrdersRouter);
 router.use(cartRouter);
 router.use(ordersRouter);
 router.use(uploadsRouter);
+router.use(reviewsRouter);
 router.use(testimonialsRouter);
 router.use(statsRouter);
 

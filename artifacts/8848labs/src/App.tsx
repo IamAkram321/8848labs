@@ -16,8 +16,8 @@ import ProjectDetailPage from './pages/ProjectDetailPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import CollectionsPage from './pages/CollectionsPage';
 import CollectionDetailPage from './pages/CollectionDetailPage';
-// import JournalPage from './pages/JournalPage';
-// import JournalPostPage from './pages/JournalPostPage';
+import JournalPage from './pages/JournalPage';
+import JournalPostPage from './pages/JournalPostPage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import CartPage from './pages/CartPage';
@@ -40,6 +40,7 @@ import AdminCustomRequestsPage from './pages/admin/AdminCustomRequestsPage';
 import AdminCustomRequestDetailPage from './pages/admin/AdminCustomRequestDetailPage';
 import AdminProductsPage from './pages/admin/AdminProductsPage';
 import AdminCollectionsPage from './pages/admin/AdminCollectionsPage';
+import AdminReviewsPage from './pages/admin/AdminReviewsPage';
 import AdminCustomersPage from './pages/admin/AdminCustomersPage';
 import AdminCustomerDetailPage from './pages/admin/AdminCustomerDetailPage';
 
@@ -65,6 +66,7 @@ function AppContent() {
         <Route path="/admin/custom-requests/:id" component={AdminCustomRequestDetailPage} />
         <Route path="/admin/products" component={AdminProductsPage} />
         <Route path="/admin/collections" component={AdminCollectionsPage} />
+        <Route path="/admin/reviews" component={AdminReviewsPage} />
         <Route path="/admin/customers" component={AdminCustomersPage} />
         <Route path="/admin/customers/:id" component={AdminCustomerDetailPage} />
       </Switch>
@@ -84,8 +86,8 @@ function AppContent() {
           <Route path="/product/:slug" component={ProductDetailPage} />
           <Route path="/collections" component={CollectionsPage} />
           <Route path="/collections/:slug" component={CollectionDetailPage} />
-          {/* <Route path="/journal" component={JournalPage} />
-          <Route path="/journal/:slug" component={JournalPostPage} /> */}
+          <Route path="/journal" component={JournalPage} />
+          <Route path="/journal/:slug" component={JournalPostPage} />
           <Route path="/about" component={AboutPage} />
           <Route path="/contact" component={ContactPage} />
           <Route path="/cart" component={CartPage} />

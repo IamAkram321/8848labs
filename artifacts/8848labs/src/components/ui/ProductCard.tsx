@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "wouter";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Star } from "lucide-react";
 import type { Product } from "@workspace/api-client-react";
 
 interface ProductCardProps {
@@ -17,7 +17,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       transition={{ duration: 0.6, delay: index * 0.1 }}
       className="group relative flex flex-col"
     >
-      <Link href={`/product/${product.slug}`} className="block overflow-hidden relative bg-card aspect-[4/5] mb-6 border border-border">
+      <Link href={`/product/${product.slug}`} className="block overflow-hidden relative bg-card aspect-4/5 mb-6 border border-border">
         {product.images[0] && (
           <motion.img 
             src={product.images[0]} 
@@ -40,6 +40,14 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             <h3 className="font-serif text-xl lg:text-2xl mb-2 group-hover:text-primary transition-colors">{product.name}</h3>
           </Link>
           <span className="text-muted-foreground text-sm uppercase tracking-wider">{product.category}</span>
+          {!!product.reviewCount && (
+            <div className="flex items-center gap-1 mt-1.5">
+              <Star className="w-3.5 h-3.5 fill-primary text-primary" />
+              <span className="text-xs text-muted-foreground">
+                {Number(product.rating).toFixed(1)} ({product.reviewCount})
+              </span>
+            </div>
+          )}
         </div>
         <span className="font-medium text-lg">${product.price.toFixed(2)}</span>
       </div>

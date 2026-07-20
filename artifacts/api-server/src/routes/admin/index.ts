@@ -5,6 +5,7 @@ import customRequestsRouter from "./custom-requests";
 import productsRouter from "./products";
 import customersRouter from "./customers";
 import collectionsRouter from "./collections";
+import reviewsRouter from "./reviews";
 
 const router = Router();
 
@@ -14,5 +15,6 @@ router.use(customRequestsRouter);
 router.use(productsRouter);
 router.use(customersRouter);
 router.use(collectionsRouter);
+router.use(reviewsRouter);
 
 export default router;
