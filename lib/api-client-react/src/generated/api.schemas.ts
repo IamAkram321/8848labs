@@ -97,21 +97,6 @@ export interface Project {
   createdAt?: string;
 }
 
-export interface JournalPost {
-  id: number;
-  title: string;
-  slug: string;
-  excerpt: string;
-  /** @nullable */
-  content?: string | null;
-  coverImage: string;
-  /** @nullable */
-  category?: string | null;
-  /** @nullable */
-  readTime?: string | null;
-  publishedAt: string;
-}
-
 export type CustomOrderInputDimensionUnit = typeof CustomOrderInputDimensionUnit[keyof typeof CustomOrderInputDimensionUnit];
 
 

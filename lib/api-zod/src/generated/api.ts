@@ -292,43 +292,6 @@ export const GetProjectResponse = zod.object({
 
 
 /**
- * @summary List journal posts
- */
-export const ListJournalPostsResponseItem = zod.object({
-  "id": zod.number(),
-  "title": zod.string(),
-  "slug": zod.string(),
-  "excerpt": zod.string(),
-  "content": zod.string().nullish(),
-  "coverImage": zod.string(),
-  "category": zod.string().nullish(),
-  "readTime": zod.string().nullish(),
-  "publishedAt": zod.string()
-})
-export const ListJournalPostsResponse = zod.array(ListJournalPostsResponseItem)
-
-
-/**
- * @summary Get a single journal post
- */
-export const GetJournalPostParams = zod.object({
-  "slug": zod.coerce.string()
-})
-
-export const GetJournalPostResponse = zod.object({
-  "id": zod.number(),
-  "title": zod.string(),
-  "slug": zod.string(),
-  "excerpt": zod.string(),
-  "content": zod.string().nullish(),
-  "coverImage": zod.string(),
-  "category": zod.string().nullish(),
-  "readTime": zod.string().nullish(),
-  "publishedAt": zod.string()
-})
-
-
-/**
  * @summary Submit a custom 3D print order request
  */
 export const CreateCustomOrderBody = zod.object({

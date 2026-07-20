@@ -17,8 +17,6 @@ import ProjectDetailPage from './pages/ProjectDetailPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import CollectionsPage from './pages/CollectionsPage';
 import CollectionDetailPage from './pages/CollectionDetailPage';
-import JournalPage from './pages/JournalPage';
-import JournalPostPage from './pages/JournalPostPage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import CartPage from './pages/CartPage';
@@ -109,8 +107,6 @@ function AppContent() {
               <Route path="/product/:slug" component={ProductDetailPage} />
               <Route path="/collections" component={CollectionsPage} />
               <Route path="/collections/:slug" component={CollectionDetailPage} />
-              <Route path="/journal" component={JournalPage} />
-              <Route path="/journal/:slug" component={JournalPostPage} />
               <Route path="/about" component={AboutPage} />
               <Route path="/contact" component={ContactPage} />
               <Route path="/cart" component={CartPage} />

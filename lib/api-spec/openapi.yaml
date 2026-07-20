@@ -15,8 +15,6 @@ tags:
     description: Curated collections
   - name: projects
     description: Featured projects / portfolio
-  - name: journal
-    description: Journal / blog posts
   - name: custom-orders
     description: Custom 3D print orders
   - name: cart
@@ -245,42 +243,7 @@ paths:
         "404":
           description: Not found
 
-  # ── Journal ───────────────────────────────────────────────────────────────
-  /journal:
-    get:
-      operationId: listJournalPosts
-      tags: [journal]
-      summary: List journal posts
-      responses:
-        "200":
-          description: Journal posts
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/JournalPost"
-
-  /journal/{slug}:
-    get:
-      operationId: getJournalPost
-      tags: [journal]
-      summary: Get a single journal post
-      parameters:
-        - name: slug
-          in: path
-          required: true
-          schema: { type: string }
-      responses:
-        "200":
-          description: Journal post
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/JournalPost"
-        "404":
-          description: Not found
-
+ 
   # ── Custom Orders ─────────────────────────────────────────────────────────
   /custom-orders:
     post:
@@ -509,8 +472,7 @@ components:
         number: { type: ["string", "null"] }
         createdAt: { type: string }
 
-    # ── Journal ───────────────────────────────────────────────────────────────
-    JournalPost:
+  
       type: object
       required: [id, title, slug, excerpt, coverImage, publishedAt]
       properties:
@@ -523,7 +485,7 @@ components:
         category: { type: ["string", "null"] }
         readTime: { type: ["string", "null"] }
         publishedAt: { type: string }
-
+        
     # ── Custom Order ──────────────────────────────────────────────────────────
     CustomOrderInput:
       type: object

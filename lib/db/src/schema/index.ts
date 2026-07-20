@@ -2,7 +2,6 @@ export * from "./products";
 export * from "./collections";
 export * from "./categories";
 export * from "./projects";
-export * from "./journal";
 export * from "./custom-orders";
 export * from "./cart";
 export * from "./testimonials";

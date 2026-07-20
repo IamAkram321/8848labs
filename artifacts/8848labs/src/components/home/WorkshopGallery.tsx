@@ -5,7 +5,7 @@ export function WorkshopGallery() {
     { src: "/src/assets/generated/gallery-workshop-1.jpg", aspect: "aspect-square" },
     { src: "/src/assets/generated/gallery-workshop-2.jpg", aspect: "aspect-[4/3]" },
     { src: "/src/assets/generated/product-prototype.jpg", aspect: "aspect-[3/4]" },
-    { src: "/src/assets/generated/journal-2.jpg", aspect: "aspect-square" }
+  
   ];
 
   return (

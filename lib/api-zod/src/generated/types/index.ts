@@ -17,7 +17,6 @@ export * from './customOrder';
 export * from './customOrderInput';
 export * from './customOrderInputDimensionUnit';
 export * from './healthStatus';
-export * from './journalPost';
 export * from './listProductsParams';
 export * from './product';
 export * from './productList';
