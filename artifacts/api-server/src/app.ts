@@ -64,7 +64,13 @@ app.use(
     store: new PgSession({
       pool,
       tableName: "session",
-      createTableIfMissing: true,
+      // NOTE: deliberately false. With createTableIfMissing: true,
+      // connect-pg-simple tries to read a table.sql file bundled inside its
+      // own package at runtime — but esbuild bundles this whole app into a
+      // single dist/index.mjs and doesn't copy that non-JS asset along with
+      // it, so that read fails in production (ENOENT). The session table is
+      // created once manually instead (see the SQL migration).
+      createTableIfMissing: false,
     }),
 
     secret:
