@@ -24,6 +24,10 @@ import CheckoutPage from './pages/CheckoutPage';
 import OrdersPage from './pages/OrdersPage';
 import OrderTrackingPage from './pages/OrderTrackingPage';
 import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
+import VerifyEmailPage from './pages/VerifyEmailPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsPage from './pages/TermsPage';
 import FAQPage from './pages/FAQPage';
@@ -114,6 +118,10 @@ function AppContent() {
               <Route path="/orders" component={OrdersPage} />
               <Route path="/orders/:id" component={OrderTrackingPage} />
               <Route path="/login" component={LoginPage} />
+              <Route path="/signup" component={SignupPage} />
+              <Route path="/forgot-password" component={ForgotPasswordPage} />
+              <Route path="/reset-password" component={ResetPasswordPage} />
+              <Route path="/verify-email" component={VerifyEmailPage} />
               <Route path="/privacy-policy" component={PrivacyPolicyPage} />
               <Route path="/terms" component={TermsPage} />
               <Route path="/faq" component={FAQPage} />

@@ -2,15 +2,23 @@ import express, { type Express } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import session from "express-session";
+import connectPgSimple from "connect-pg-simple";
+import helmet from "helmet";
 import passport from "passport";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import { pool } from "@workspace/db";
 
 // Registers passport strategies
 import "./routes/auth";
 
 const app: Express = express();
+
+// Security headers (X-Content-Type-Options, X-Frame-Options, a reasonable
+// default Content-Security-Policy, etc.). This app serves a JSON API only —
+// no server-rendered HTML — so the defaults are safe with no extra tuning.
+app.use(helmet());
 
 app.use(
   pinoHttp({
@@ -49,8 +57,16 @@ app.use(
 app.use(cookieParser());
 
 // Session
+const PgSession = connectPgSimple(session);
+
 app.use(
   session({
+    store: new PgSession({
+      pool,
+      tableName: "session",
+      createTableIfMissing: true,
+    }),
+
     secret:
       process.env.SESSION_SECRET ??
       "fallback-dev-secret-change-me",

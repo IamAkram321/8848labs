@@ -1,16 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useLocation } from 'wouter';
+import { Link } from 'wouter';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { API_URL } from '@/lib/api-url';
 
 const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY as string | undefined;
-// Client-side heuristic only — the server independently enforces its own
-// CAPTCHA requirement once an account has failed enough real attempts. This
-// local counter just decides when to proactively show the widget so a
-// legitimate user isn't surprised by a hidden server-side gate.
-const SHOW_CAPTCHA_AFTER_FAILURES = 2;
 
 function GoogleIcon() {
   return (
@@ -23,15 +18,16 @@ function GoogleIcon() {
   );
 }
 
-export default function LoginPage() {
+export default function SignupPage() {
   const { user, isAdmin, isLoading } = useAuth();
   const { toast } = useToast();
-  const [, navigate] = useLocation();
 
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [failureCount, setFailureCount] = useState(0);
+  const [submitted, setSubmitted] = useState(false);
   const captchaRef = useRef<ReCAPTCHA>(null);
 
   useEffect(() => {
@@ -40,38 +36,68 @@ export default function LoginPage() {
     }
   }, [isLoading, user, isAdmin]);
 
-  const showCaptcha = failureCount >= SHOW_CAPTCHA_AFTER_FAILURES && !!RECAPTCHA_SITE_KEY;
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (password.length < 8) {
+      toast({ title: 'Password must be at least 8 characters', variant: 'destructive' });
+      return;
+    }
+    if (password !== confirmPassword) {
+      toast({ title: "Passwords don't match", variant: 'destructive' });
+      return;
+    }
+
+    const captchaToken = captchaRef.current?.getValue();
+    if (RECAPTCHA_SITE_KEY && !captchaToken) {
+      toast({ title: 'Please complete the CAPTCHA', variant: 'destructive' });
+      return;
+    }
+
     setIsSubmitting(true);
-
     try {
-      const captchaToken = captchaRef.current?.getValue() || undefined;
-
-      const res = await fetch(`${API_URL}/api/auth/login`, {
+      const res = await fetch(`${API_URL}/api/auth/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ email, password, captchaToken }),
+        body: JSON.stringify({ name, email, password, captchaToken }),
       });
       const data = await res.json();
 
       if (!res.ok) {
-        setFailureCount((c) => c + 1);
         captchaRef.current?.reset();
-        toast({ title: data.error ?? 'Could not sign in', variant: 'destructive' });
+        toast({ title: data.error ?? 'Could not create account', variant: 'destructive' });
         return;
       }
 
-      // Full reload so AuthContext re-fetches /auth/me with the new session cookie.
-      window.location.href = data.user?.role === 'ADMIN' ? '/admin' : '/';
+      // Same message and same screen regardless of whether this email was
+      // actually new — this page never learns which case it was.
+      setSubmitted(true);
     } catch {
       toast({ title: 'Something went wrong. Please try again.', variant: 'destructive' });
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  if (submitted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background px-6 text-center">
+        <div className="w-full max-w-sm">
+          <Link href="/" className="flex items-center justify-center mb-8">
+            <img src="/logo.jpeg" alt="8848LABS" className="h-16 w-auto" />
+          </Link>
+          <h1 className="text-2xl font-serif text-foreground mb-4">Check your email</h1>
+          <p className="text-muted-foreground">
+            If that email address is available, we've sent instructions to confirm your account. Follow the link in that email to finish setting up.
+          </p>
+          <Link href="/login" className="inline-block mt-8 text-sm text-primary hover:underline">
+            Back to sign in
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-6 py-16">
@@ -80,12 +106,23 @@ export default function LoginPage() {
           <img src="/logo.jpeg" alt="8848LABS" className="h-16 w-auto" />
         </Link>
 
-        <h1 className="text-3xl font-serif text-foreground mb-2 text-center">Welcome back</h1>
+        <h1 className="text-3xl font-serif text-foreground mb-2 text-center">Create an account</h1>
         <p className="text-muted-foreground mb-8 text-center">
-          Sign in to track orders, save favorites, and manage your custom projects.
+          Join to track orders and manage your custom projects.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4 mb-6">
+          <div>
+            <label className="block text-sm font-medium mb-1.5">Full Name</label>
+            <input
+              type="text"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full border border-border bg-card px-4 py-2.5 text-sm rounded-lg focus:outline-none focus:border-primary transition-colors"
+              placeholder="Your name"
+            />
+          </div>
           <div>
             <label className="block text-sm font-medium mb-1.5">Email</label>
             <input
@@ -98,25 +135,31 @@ export default function LoginPage() {
             />
           </div>
           <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="text-sm font-medium">Password</label>
-              <Link href="/forgot-password" className="text-xs text-primary hover:underline">
-                Forgot password?
-              </Link>
-            </div>
+            <label className="block text-sm font-medium mb-1.5">Password</label>
             <input
               type="password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full border border-border bg-card px-4 py-2.5 text-sm rounded-lg focus:outline-none focus:border-primary transition-colors"
+              placeholder="At least 8 characters"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1.5">Confirm Password</label>
+            <input
+              type="password"
+              required
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="w-full border border-border bg-card px-4 py-2.5 text-sm rounded-lg focus:outline-none focus:border-primary transition-colors"
               placeholder="••••••••"
             />
           </div>
 
-          {showCaptcha && (
+          {RECAPTCHA_SITE_KEY && (
             <div className="flex justify-center pt-1">
-              <ReCAPTCHA ref={captchaRef} sitekey={RECAPTCHA_SITE_KEY!} />
+              <ReCAPTCHA ref={captchaRef} sitekey={RECAPTCHA_SITE_KEY} />
             </div>
           )}
 
@@ -125,14 +168,14 @@ export default function LoginPage() {
             disabled={isSubmitting}
             className="w-full bg-foreground text-background py-3 rounded-lg text-sm font-medium hover:bg-primary transition-colors disabled:opacity-60"
           >
-            {isSubmitting ? 'Signing in...' : 'Sign In'}
+            {isSubmitting ? 'Creating account...' : 'Create Account'}
           </button>
         </form>
 
         <p className="text-sm text-center text-muted-foreground mb-6">
-          Don't have an account?{' '}
-          <Link href="/signup" className="text-primary hover:underline font-medium">
-            Sign up
+          Already have an account?{' '}
+          <Link href="/login" className="text-primary hover:underline font-medium">
+            Sign in
           </Link>
         </p>
 
@@ -149,19 +192,11 @@ export default function LoginPage() {
           onClick={() => {
             window.location.href = `${API_URL}/api/auth/google`;
           }}
-          disabled={isLoading}
-          className="w-full flex items-center justify-center gap-3 rounded-lg border border-border bg-card px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-60"
+          className="w-full flex items-center justify-center gap-3 rounded-lg border border-border bg-card px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted"
         >
           <GoogleIcon />
           Continue with Google
         </button>
-
-        <p className="text-xs text-muted-foreground mt-8 text-center">
-          By continuing, you agree to our{' '}
-          <Link href="/terms" className="underline hover:text-primary">Terms</Link>{' '}
-          and{' '}
-          <Link href="/privacy-policy" className="underline hover:text-primary">Privacy Policy</Link>.
-        </p>
       </div>
     </div>
   );
