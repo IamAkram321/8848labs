@@ -46,7 +46,7 @@ export const ALLOWED_UPLOAD_EXTENSIONS = new Set([
   ...RAW_DOCUMENT_EXTENSIONS,
 ]);
 
-const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+const MAX_FILE_SIZE = 200 * 1024 * 1024; // 200MB — 3D models (esp. textured GLB) can be much larger than typical images
 
 function getExtension(filename: string): string {
   const idx = filename.lastIndexOf(".");
