@@ -4,7 +4,8 @@ import { Upload, X, Check, ChevronRight, ArrowLeft, FileText } from 'lucide-reac
 import { useCreateCustomOrder } from '@workspace/api-client-react';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { useToast } from '@/hooks/use-toast';
-import { API_URL } from '@/lib/api-url';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
+import { API_URL, uploadFilesWithTimeout } from '@/lib/api-url';
 import { Link } from 'wouter';
 
 const ALLOWED_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.stl', '.3mf', '.obj', '.glb'];
@@ -22,6 +23,10 @@ export default function CustomStudioPage() {
   const [fileUrls, setFileUrls] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [isDragActive, setIsDragActive] = useState(false);
+  const [failedUploadOpen, setFailedUploadOpen] = useState(false);
+  const [failedUploadFileName, setFailedUploadFileName] = useState('');
+  const [failedUploadDescription, setFailedUploadDescription] = useState('');
+  const [failedUploadNotes, setFailedUploadNotes] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -44,30 +49,37 @@ export default function CustomStudioPage() {
     setIsUploading(true);
 
     try {
-      const body = new FormData();
-      valid.forEach((file) => body.append('files', file));
+      const { ok, data } = await uploadFilesWithTimeout(valid);
 
-      const res = await fetch(`${API_URL}/api/uploads`, {
-        method: 'POST',
-        credentials: 'include',
-        body,
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        toast({ title: data.error ?? 'Upload failed', variant: 'destructive' });
+      if (!ok) {
         setFiles((prev) => prev.filter((f) => !valid.includes(f)));
+        // Instead of just a toast (which loses the context that this file
+        // was ever attempted), open a modal asking the customer to briefly
+        // describe what they wanted to upload — most failures at this point
+        // are large STL/3D files exceeding what Cloudinary's plan allows in
+        // a single upload, so the file itself is lost, but their intent
+        // doesn't have to be.
+        setFailedUploadFileName(valid[0]?.name ?? 'your file');
+        setFailedUploadDescription('');
+        setFailedUploadOpen(true);
         return;
       }
 
       setFileUrls((prev) => [...prev, ...data.urls]);
-    } catch {
-      toast({ title: 'Upload failed. Please try again.', variant: 'destructive' });
-      setFiles((prev) => prev.filter((f) => !valid.includes(f)));
     } finally {
       setIsUploading(false);
     }
+  };
+
+  const handleSaveFailedUploadNote = () => {
+    const note = failedUploadDescription.trim();
+    if (note) {
+      setFailedUploadNotes((prev) => [
+        ...prev,
+        `Attached file "${failedUploadFileName}" could not be uploaded (likely too large). Customer's description: ${note}`,
+      ]);
+    }
+    setFailedUploadOpen(false);
   };
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -126,6 +138,7 @@ export default function CustomStudioPage() {
         heightMm: formData.heightMm ? Number(formData.heightMm) : undefined,
         quantity: Number(formData.quantity),
         fileUrls,
+        additionalNotes: failedUploadNotes.length > 0 ? failedUploadNotes.join('\n\n') : undefined,
       } as any
     }, {
       onSuccess: () => {
@@ -245,6 +258,17 @@ export default function CustomStudioPage() {
                         </li>
                       ))}
                     </ul>
+                  )}
+
+                  {failedUploadNotes.length > 0 && (
+                    <div className="mt-6 border border-primary/30 bg-primary/5 px-4 py-3 text-sm">
+                      <p className="font-medium text-primary mb-1">
+                        {failedUploadNotes.length} file{failedUploadNotes.length > 1 ? 's' : ''} couldn't upload — but we saved your description
+                      </p>
+                      <p className="text-muted-foreground">
+                        Our team will follow up to arrange getting the file another way. You can still submit your request.
+                      </p>
+                    </div>
                   )}
                 </motion.div>
               )}
@@ -475,6 +499,42 @@ export default function CustomStudioPage() {
           </form>
         </div>
       </div>
+
+      <Dialog open={failedUploadOpen} onOpenChange={setFailedUploadOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="font-serif">We couldn't upload that file</DialogTitle>
+            <DialogDescription>
+              "{failedUploadFileName}" is too large for us to accept directly — this is usually the case for
+              detailed 3D scans or high-poly models. No problem: just describe what you're looking to create
+              below, and one of our engineers will reach out to arrange getting the file another way.
+            </DialogDescription>
+          </DialogHeader>
+          <textarea
+            rows={5}
+            value={failedUploadDescription}
+            onChange={(e) => setFailedUploadDescription(e.target.value)}
+            className="w-full border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:border-primary transition-colors"
+            placeholder="e.g. It's a 12cm tall figurine of a dragon, highly detailed scales, I have the STL file ready to send separately..."
+          />
+          <DialogFooter>
+            <button
+              type="button"
+              onClick={() => setFailedUploadOpen(false)}
+              className="px-6 py-3 text-sm uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Skip
+            </button>
+            <button
+              type="button"
+              onClick={handleSaveFailedUploadNote}
+              className="bg-foreground text-background px-6 py-3 uppercase tracking-widest text-sm font-medium hover:bg-primary transition-colors"
+            >
+              Save & Continue
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

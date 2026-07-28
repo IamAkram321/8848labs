@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Download } from 'lucide-react';
+import { ArrowLeft, Download, AlertTriangle } from 'lucide-react';
 import { API_URL } from '@/lib/api-url';
 
 const CUSTOM_REQUEST_STATUSES = ['pending', 'under_review', 'quotation_sent', 'approved', 'in_production', 'completed', 'cancelled'];
@@ -189,6 +189,23 @@ export default function AdminCustomRequestDetailPage() {
                       )
                     ))}
                   </div>
+                </div>
+              )}
+
+              {/* Failed-upload note — the customer's own description of a file
+                  that couldn't be uploaded (usually too large). Shown as a
+                  distinct warning-style callout, not buried inside the regular
+                  description field, since it explains a missing attachment. */}
+              {request.additionalNotes && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <AlertTriangle className="h-4 w-4 text-yellow-700" />
+                    <h2 className="font-serif text-lg text-yellow-900">File Upload Issue</h2>
+                  </div>
+                  <p className="text-sm text-yellow-800 mb-2">
+                    A file the customer tried to attach couldn't be uploaded. Here's what they told us instead:
+                  </p>
+                  <p className="text-yellow-900 whitespace-pre-wrap font-medium">{request.additionalNotes}</p>
                 </div>
               )}
             </div>

@@ -4,7 +4,7 @@ import { useLocation } from 'wouter';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Eye } from 'lucide-react';
+import { Search, Eye, AlertTriangle } from 'lucide-react';
 import { API_URL } from '@/lib/api-url';
 
 const STATUS_TABS = ['all', 'pending', 'under_review', 'quotation_sent', 'approved', 'in_production', 'completed', 'cancelled'];
@@ -119,7 +119,14 @@ export default function AdminCustomRequestsPage() {
                     <tr key={req.id} className="hover:bg-muted/20">
                       <td className="px-6 py-4 font-medium">#{req.id}</td>
                       <td className="px-6 py-4">{req.fullName ?? req.user?.name ?? '—'}</td>
-                      <td className="px-6 py-4">{req.projectName ?? req.title ?? '—'}</td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          {req.projectName ?? req.title ?? '—'}
+                          {req.additionalNotes && (
+                            <AlertTriangle className="h-3.5 w-3.5 text-yellow-600 shrink-0" aria-label="File upload issue — see request details" />
+                          )}
+                        </div>
+                      </td>
                       <td className="px-6 py-4">{req.material ?? '—'}</td>
                       <td className="px-6 py-4"><StatusBadge status={req.status} /></td>
                       <td className="px-6 py-4 text-muted-foreground">{new Date(req.createdAt).toLocaleDateString()}</td>
