@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer, decimal, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, integer, decimal, timestamp, jsonb, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -28,7 +28,11 @@ export const customOrdersTable = pgTable("custom_orders", {
   internalNotes: text("internal_notes"),
   quotationPrice: text("quotation_price"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-});
+}, (table) => [
+  // Admin filters the requests list by status constantly.
+  index("custom_orders_status_idx").on(table.status),
+  index("custom_orders_email_idx").on(table.email),
+]);
 
 export const insertCustomOrderSchema = createInsertSchema(customOrdersTable).omit({ id: true, createdAt: true, status: true });
 export type InsertCustomOrder = z.infer<typeof insertCustomOrderSchema>;

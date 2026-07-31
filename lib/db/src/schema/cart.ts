@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer, decimal, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, integer, decimal, timestamp, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -21,7 +21,12 @@ export const cartItemsTable = pgTable("cart_items", {
   material: text("material"),
   personalization: text("personalization"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-});
+}, (table) => [
+  // Every cart read/write filters by sessionId — this is the hottest lookup
+  // path in the whole app (hit on nearly every page load).
+  index("cart_items_session_id_idx").on(table.sessionId),
+  index("cart_items_product_id_idx").on(table.productId),
+]);
 
 export const insertCartItemSchema = createInsertSchema(cartItemsTable).omit({ id: true, createdAt: true });
 export type InsertCartItem = z.infer<typeof insertCartItemSchema>;

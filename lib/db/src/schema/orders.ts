@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer, decimal, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, integer, decimal, timestamp, index } from "drizzle-orm/pg-core";
 
 // Order status flow: pending → confirmed → processing → shipped → delivered | cancelled
 export const ordersTable = pgTable("orders", {
@@ -16,7 +16,11 @@ export const ordersTable = pgTable("orders", {
   notes: text("notes"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+}, (table) => [
+  // "My Orders" filters by userId on every load; admin filters by status.
+  index("orders_user_id_idx").on(table.userId),
+  index("orders_status_idx").on(table.status),
+]);
 
 export const orderItemsTable = pgTable("order_items", {
   id: serial("id").primaryKey(),
@@ -28,7 +32,10 @@ export const orderItemsTable = pgTable("order_items", {
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   color: text("color"),
   material: text("material"),
-});
+}, (table) => [
+  index("order_items_order_id_idx").on(table.orderId),
+  index("order_items_product_id_idx").on(table.productId),
+]);
 
 export type Order = typeof ordersTable.$inferSelect;
 export type OrderItem = typeof orderItemsTable.$inferSelect;

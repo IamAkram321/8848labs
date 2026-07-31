@@ -1,4 +1,4 @@
-import { pgTable, serial, text, boolean, integer } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, boolean, integer, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -19,4 +19,7 @@ export type Collection = typeof collectionsTable.$inferSelect;
 export const collectionProductsTable = pgTable("collection_products", {
   collectionId: integer("collection_id").notNull(),
   productId: integer("product_id").notNull(),
-});
+}, (table) => [
+  index("collection_products_collection_id_idx").on(table.collectionId),
+  index("collection_products_product_id_idx").on(table.productId),
+]);
