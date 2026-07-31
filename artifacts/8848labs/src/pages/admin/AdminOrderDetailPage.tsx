@@ -105,7 +105,9 @@ export default function AdminOrderDetailPage() {
                   </div>
                   <div>
                     <p className="text-muted-foreground">Phone</p>
-                    <p className="font-medium">{order.phone ?? order.shippingAddress?.phone ?? '—'}</p>
+                    <p className="font-medium">
+                      {order.customerPhone?.trim() || '—'}
+                    </p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Order Date</p>
@@ -126,13 +128,13 @@ export default function AdminOrderDetailPage() {
                         ? typeof order.shippingAddress === 'string'
                           ? order.shippingAddress
                           : [
-                              order.shippingAddress.street,
-                              order.shippingAddress.city,
-                              order.shippingAddress.state,
-                              order.shippingAddress.country,
-                            ]
-                              .filter(Boolean)
-                              .join(', ')
+                            order.shippingAddress.street,
+                            order.shippingAddress.city,
+                            order.shippingAddress.state,
+                            order.shippingAddress.country,
+                          ]
+                            .filter(Boolean)
+                            .join(', ')
                         : '—'}
                     </p>
                   </div>
