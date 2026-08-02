@@ -1,12 +1,13 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { createCloudinaryUploader } from "../lib/cloudinary";
+import { uploadLimiter } from "../middleware/publicLimiter";
 
 const upload = createCloudinaryUploader("8848labs/uploads");
 
 const router: IRouter = Router();
 
 /** POST /api/uploads — accepts up to 10 files, uploads them to Cloudinary, returns their secure URLs */
-router.post("/uploads", (req: Request, res: Response) => {
+router.post("/uploads", uploadLimiter, (req: Request, res: Response) => {
   const handler = upload.array("files", 10);
 
   handler(req, res, (err: unknown) => {
