@@ -1,7 +1,8 @@
 import { Router, Request, Response } from "express";
 import { db, reviewsTable, productsTable } from "@workspace/db";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, count } from "drizzle-orm";
 import { requireAdmin } from "../../middleware/requireAuth";
+import { getPaginationParams, buildPaginationMeta } from "../../lib/pagination";
 
 const router = Router();
 
@@ -24,25 +25,32 @@ async function recomputeProductRating(productId: number): Promise<void> {
 }
 
 /** GET /api/admin/reviews — every review, with its product name, newest first */
-router.get("/reviews", requireAdmin, async (_req: Request, res: Response): Promise<void> => {
+router.get("/reviews", requireAdmin, async (req: Request, res: Response): Promise<void> => {
   try {
-    const reviews = await db
-      .select({
-        id: reviewsTable.id,
-        productId: reviewsTable.productId,
-        productName: productsTable.name,
-        customerName: reviewsTable.customerName,
-        rating: reviewsTable.rating,
-        title: reviewsTable.title,
-        comment: reviewsTable.comment,
-        verifiedPurchase: reviewsTable.verifiedPurchase,
-        createdAt: reviewsTable.createdAt,
-      })
-      .from(reviewsTable)
-      .leftJoin(productsTable, eq(reviewsTable.productId, productsTable.id))
-      .orderBy(desc(reviewsTable.createdAt));
+    const pagination = getPaginationParams(req);
 
-    res.json({ reviews, total: reviews.length });
+    const [reviews, [{ total }]] = await Promise.all([
+      db
+        .select({
+          id: reviewsTable.id,
+          productId: reviewsTable.productId,
+          productName: productsTable.name,
+          customerName: reviewsTable.customerName,
+          rating: reviewsTable.rating,
+          title: reviewsTable.title,
+          comment: reviewsTable.comment,
+          verifiedPurchase: reviewsTable.verifiedPurchase,
+          createdAt: reviewsTable.createdAt,
+        })
+        .from(reviewsTable)
+        .leftJoin(productsTable, eq(reviewsTable.productId, productsTable.id))
+        .orderBy(desc(reviewsTable.createdAt))
+        .limit(pagination.limit)
+        .offset(pagination.offset),
+      db.select({ total: count() }).from(reviewsTable),
+    ]);
+
+    res.json({ reviews, ...buildPaginationMeta(pagination, total) });
   } catch (err) {
     console.error("[admin/reviews GET]", err);
     res.status(500).json({ error: "Internal server error" });

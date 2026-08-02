@@ -1,7 +1,8 @@
 import { Router, Request, Response } from "express";
 import { db, usersTable, ordersTable } from "@workspace/db";
-import { eq, desc, count, sql } from "drizzle-orm";
+import { eq, desc, count, sql, or, ilike } from "drizzle-orm";
 import { requireAdmin } from "../../middleware/requireAuth";
+import { getPaginationParams, buildPaginationMeta } from "../../lib/pagination";
 
 const router = Router();
 
@@ -21,32 +22,36 @@ type CustomerRow = {
 router.get("/customers", requireAdmin, async (req: Request, res: Response): Promise<void> => {
   try {
     const { search } = req.query as Record<string, string>;
+    const pagination = getPaginationParams(req);
 
-    const customers = (await db
-      .select({
-        id: usersTable.id,
-        name: usersTable.name,
-        email: usersTable.email,
-        avatar: usersTable.avatar,
-        role: usersTable.role,
-        createdAt: usersTable.createdAt,
-        orderCount: sql<number>`cast(count(distinct ${ordersTable.id}) as int)`,
-        totalSpent: sql<string>`coalesce(sum(${ordersTable.total}::numeric), 0)::text`,
-        lastOrderAt: sql<Date | null>`max(${ordersTable.createdAt})`,
-      })
-      .from(usersTable)
-      .leftJoin(ordersTable, eq(ordersTable.userId, usersTable.id))
-      .groupBy(usersTable.id)
-      .orderBy(desc(usersTable.createdAt))) as CustomerRow[];
+    const where = search
+      ? or(ilike(usersTable.name, `%${search}%`), ilike(usersTable.email, `%${search}%`))
+      : undefined;
 
-    const filtered = search
-      ? customers.filter((c) =>
-          c.name.toLowerCase().includes(search.toLowerCase()) ||
-          c.email.toLowerCase().includes(search.toLowerCase())
-        )
-      : customers;
+    const [customers, [{ total }]] = await Promise.all([
+      db
+        .select({
+          id: usersTable.id,
+          name: usersTable.name,
+          email: usersTable.email,
+          avatar: usersTable.avatar,
+          role: usersTable.role,
+          createdAt: usersTable.createdAt,
+          orderCount: sql<number>`cast(count(distinct ${ordersTable.id}) as int)`,
+          totalSpent: sql<string>`coalesce(sum(${ordersTable.total}::numeric), 0)::text`,
+          lastOrderAt: sql<Date | null>`max(${ordersTable.createdAt})`,
+        })
+        .from(usersTable)
+        .leftJoin(ordersTable, eq(ordersTable.userId, usersTable.id))
+        .where(where)
+        .groupBy(usersTable.id)
+        .orderBy(desc(usersTable.createdAt))
+        .limit(pagination.limit)
+        .offset(pagination.offset) as unknown as Promise<CustomerRow[]>,
+      db.select({ total: count() }).from(usersTable).where(where),
+    ]);
 
-    res.json({ customers: filtered, total: filtered.length });
+    res.json({ customers, ...buildPaginationMeta(pagination, total) });
   } catch (err) {
     console.error("[admin/customers]", err);
     res.status(500).json({ error: "Internal server error" });

@@ -1,8 +1,8 @@
 import { Router, Request, Response } from "express";
 import { db, productsTable } from "@workspace/db";
-import type { Product } from "@workspace/db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and, or, ilike, lt, count } from "drizzle-orm";
 import { requireAdmin } from "../../middleware/requireAuth";
+import { getPaginationParams, buildPaginationMeta } from "../../lib/pagination";
 
 const router = Router();
 
@@ -10,18 +10,22 @@ const router = Router();
 router.get("/products", requireAdmin, async (req: Request, res: Response): Promise<void> => {
   try {
     const { search, lowStock } = req.query as Record<string, string>;
-    let products = await db.select().from(productsTable).orderBy(desc(productsTable.createdAt));
+    const pagination = getPaginationParams(req);
 
-    if (search) {
-      const q = search.toLowerCase();
-      products = products.filter((p: Product) =>
-        p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q)
-      );
-    }
-    if (lowStock === "true") {
-      products = products.filter((p: Product) => (p.stock ?? 0) < 5);
-    }
-    res.json({ products, total: products.length });
+    const conditions = [
+      search ? or(ilike(productsTable.name, `%${search}%`), ilike(productsTable.category, `%${search}%`)) : undefined,
+      lowStock === "true" ? lt(productsTable.stock, 5) : undefined,
+    ].filter((c): c is NonNullable<typeof c> => c !== undefined);
+
+    const where = conditions.length > 0 ? and(...conditions) : undefined;
+
+    const [products, [{ total }]] = await Promise.all([
+      db.select().from(productsTable).where(where).orderBy(desc(productsTable.createdAt))
+        .limit(pagination.limit).offset(pagination.offset),
+      db.select({ total: count() }).from(productsTable).where(where),
+    ]);
+
+    res.json({ products, ...buildPaginationMeta(pagination, total) });
   } catch (err) {
     console.error("[admin/products GET]", err);
     res.status(500).json({ error: "Internal server error" });

@@ -1,9 +1,9 @@
 import { Router, Request, Response } from "express";
 import { db, ordersTable, orderItemsTable } from "@workspace/db";
-import type { Order } from "@workspace/db";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, and, or, ilike, sql, count } from "drizzle-orm";
 import { requireAdmin } from "../../middleware/requireAuth";
 import { sendOrderStatusUpdateEmail } from "../../lib/email";
+import { getPaginationParams, buildPaginationMeta } from "../../lib/pagination";
 
 const router = Router();
 const VALID_STATUSES = ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"];
@@ -12,22 +12,28 @@ const VALID_STATUSES = ["pending", "confirmed", "processing", "shipped", "delive
 router.get("/orders", requireAdmin, async (req: Request, res: Response): Promise<void> => {
   try {
     const { status, search } = req.query as Record<string, string>;
+    const pagination = getPaginationParams(req);
 
-    let orders = await db.select().from(ordersTable).orderBy(desc(ordersTable.createdAt));
+    const conditions = [
+      status && status !== "all" ? eq(ordersTable.status, status) : undefined,
+      search
+        ? or(
+            ilike(ordersTable.customerName, `%${search}%`),
+            ilike(ordersTable.customerEmail, `%${search}%`),
+            ilike(sql`${ordersTable.id}::text`, `%${search}%`)
+          )
+        : undefined,
+    ].filter((c): c is NonNullable<typeof c> => c !== undefined);
 
-    if (status && status !== "all") {
-      orders = orders.filter((o: Order) => o.status === status);
-    }
-    if (search) {
-      const q = search.toLowerCase();
-      orders = orders.filter((o: Order) =>
-        o.customerName.toLowerCase().includes(q) ||
-        o.customerEmail.toLowerCase().includes(q) ||
-        String(o.id).includes(q)
-      );
-    }
+    const where = conditions.length > 0 ? and(...conditions) : undefined;
 
-    res.json({ orders, total: orders.length });
+    const [orders, [{ total }]] = await Promise.all([
+      db.select().from(ordersTable).where(where).orderBy(desc(ordersTable.createdAt))
+        .limit(pagination.limit).offset(pagination.offset),
+      db.select({ total: count() }).from(ordersTable).where(where),
+    ]);
+
+    res.json({ orders, ...buildPaginationMeta(pagination, total) });
   } catch (err) {
     console.error("[admin/orders]", err);
     res.status(500).json({ error: "Internal server error" });
