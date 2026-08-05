@@ -14,19 +14,19 @@ const galleryItemVariants: Variants = {
 export function WorkshopGallery() {
   const images = [
     { 
-      src: "/src/assets/generated/gallery-workshop-1.jpg", 
+      src: "/images/gallery-workshop-1.jpg", 
       aspect: "aspect-square",
       title: "Additive Production Cell",
       tag: "Studio Floor"
     },
     { 
-      src: "/src/assets/generated/gallery-workshop-2.jpg", 
+      src: "/images/gallery-workshop-2.jpg", 
       aspect: "aspect-[16/10]",
       title: "Material Finishing & Polish",
       tag: "Post-Processing"
     },
     { 
-      src: "/src/assets/generated/product-prototype.jpg", 
+      src: "/images/product-prototype.jpg", 
       aspect: "aspect-[3/4]",
       title: "Prototyping & Inspection",
       tag: "Quality Control"

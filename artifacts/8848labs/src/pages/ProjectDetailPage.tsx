@@ -37,9 +37,9 @@ export default function ProjectDetailPage() {
     description:
       "A spatial exploration investigating high-precision polymer assemblies, structural lattice density, and light diffusion through bespoke geometric forms.",
     images: [
-      "/src/assets/generated/project-hero-1.jpg",
-      "/src/assets/generated/project-hero-2.jpg",
-      "/src/assets/generated/project-hero-3.jpg",
+      "/images/project-hero-1.jpg",
+      "/images/project-hero-2.jpg",
+      "/images/project-hero-3.jpg",
     ],
     specs: [
       { label: "Material", value: "PETG / Amber Resin" },
@@ -54,7 +54,7 @@ export default function ProjectDetailPage() {
       
       {/* Light Mesh & Ambient Glow Backdrop */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -right-20 top-1/4 w-[650px] h-[650px] rounded-full bg-gradient-to-br from-amber-200/20 via-orange-100/20 to-transparent blur-[140px]" />
+        <div className="absolute -right-20 top-1/4 w-162.5 h-162.5 rounded-full bg-gradient-to-br from-amber-200/20 via-orange-100/20 to-transparent blur-[140px]" />
         <div className="absolute left-10 bottom-20 w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-amber-300/15 via-amber-100/25 to-transparent blur-[150px]" />
         <div className="absolute inset-0 bg-[radial-gradient(#000000_1px,transparent_1px)] [background-size:36px_36px] opacity-[0.025]" />
       </div>
@@ -197,7 +197,7 @@ export default function ProjectDetailPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.15 }}
-                className="overflow-hidden rounded-3xl border border-neutral-200/90 aspect-[4/3] bg-neutral-100 shadow-xs"
+                className="overflow-hidden rounded-3xl border border-neutral-200/90 aspect-4/3 bg-neutral-100 shadow-xs"
               >
                 <img
                   src={img}
