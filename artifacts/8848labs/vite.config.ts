@@ -27,7 +27,7 @@ export default defineConfig(({ mode }): UserConfig => {
     root: path.resolve(import.meta.dirname),
 
     build: {
-      outDir: path.resolve(import.meta.dirname, 'dist/public'),
+      outDir: path.resolve(import.meta.dirname, 'dist'), // FIXED: Changed from 'dist/public' to 'dist'
       emptyOutDir: true,
     },
 
