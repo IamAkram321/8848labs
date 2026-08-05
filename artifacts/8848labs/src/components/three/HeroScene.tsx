@@ -16,9 +16,9 @@ function Sculpture() {
 
   return (
     <Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
-      <mesh ref={meshRef} castShadow receiveShadow>
+      <mesh ref={meshRef} castShadow receiveShadow scale={1.0}>
         <torusKnotGeometry args={[1.5, 0.4, 256, 32]} />
-        <meshStandardMaterial 
+        <meshStandardMaterial
           ref={materialRef}
           color="#B8956A" // Warm bronze/gold
           roughness={0.2}
@@ -34,24 +34,25 @@ export function HeroScene() {
   return (
     <Canvas shadows camera={{ position: [0, 0, 8], fov: 45 }} className="w-full h-full bg-transparent">
       <color attach="background" args={['transparent']} />
-      
+
       <ambientLight intensity={0.5} />
-      <directionalLight 
-        position={[5, 5, 5]} 
-        intensity={2} 
-        castShadow 
-        shadow-mapSize-width={1024} 
-        shadow-mapSize-height={1024} 
+      <directionalLight
+        position={[5, 5, 5]}
+        intensity={2}
+        castShadow
+        shadow-mapSize-width={1024}
+        shadow-mapSize-height={1024}
       />
       <spotLight position={[-5, 5, -5]} intensity={1} color="#FFD700" />
-      
+
       <PresentationControls
         global
-        config={{ mass: 2, tension: 500 }}
-        snap={{ mass: 4, tension: 1500 }}
+        cursor
+        speed={1.2}
+        zoom={1}
         rotation={[0, 0.3, 0]}
-        polar={[-Math.PI / 3, Math.PI / 3]}
-        azimuth={[-Math.PI / 1.4, Math.PI / 2]}
+        polar={[-0.45, 0.45]}
+        azimuth={[-1, 1]}
       >
         <Sculpture />
       </PresentationControls>

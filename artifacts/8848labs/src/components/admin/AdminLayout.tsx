@@ -1,6 +1,19 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
-import { LayoutDashboard, ShoppingBag, Printer, Package, Layers, Star, Users, Menu, X, LogOut, ArrowLeft, ExternalLink } from 'lucide-react';
+import { 
+  LayoutDashboard, 
+  ShoppingBag, 
+  Printer, 
+  Package, 
+  Layers, 
+  Star, 
+  Users, 
+  Menu, 
+  LogOut, 
+  ArrowLeft, 
+  ExternalLink,
+  ChevronRight
+} from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -40,22 +53,26 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#1A1714] text-[#F5F0E8]">
-      <div className="p-6 border-b border-[#F5F0E8]/10 flex items-center gap-3">
-        <img src="/logo.jpeg" className="h-10 w-auto rounded-sm" alt="8848LABS" />
-        <div className="leading-tight">
-          <p className="font-serif text-sm text-[#F5F0E8]">8848LABS</p>
-          <p className="text-[10px] uppercase tracking-[0.2em] text-[#F5F0E8]/50">Admin</p>
+    <div className="flex flex-col h-full bg-[#121110] text-neutral-100 selection:bg-amber-500/20 selection:text-amber-300">
+      {/* Brand Header */}
+      <div className="p-6 border-b border-neutral-800/80 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <img src="/logo.jpeg" className="h-9 w-9 rounded-2xl object-cover ring-1 ring-neutral-700/50" alt="8848LABS" />
+          <div className="leading-tight">
+            <p className="font-serif text-sm tracking-wide font-normal text-white">8848LABS</p>
+            <p className="text-[10px] font-mono uppercase tracking-widest text-amber-500/90 font-medium">Console</p>
+          </div>
         </div>
       </div>
 
-      <nav className="flex-1 px-4 py-6 space-y-7 overflow-y-auto">
+      {/* Navigation Links */}
+      <nav className="flex-1 px-4 py-6 space-y-6 overflow-y-auto custom-scrollbar">
         {navGroups.map((group) => (
-          <div key={group.label}>
-            <p className="px-3 mb-2 text-[10px] uppercase tracking-[0.2em] text-[#F5F0E8]/35 font-medium">
+          <div key={group.label} className="space-y-1.5">
+            <p className="px-3 text-[10px] font-mono uppercase tracking-widest text-neutral-500 font-semibold">
               {group.label}
             </p>
-            <div className="space-y-0.5">
+            <div className="space-y-1">
               {group.items.map(({ href, label, icon: Icon }) => {
                 const active = isActive(href);
                 return (
@@ -63,17 +80,17 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
                     key={href}
                     href={href}
                     onClick={onClose}
-                    className={`relative flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
+                    className={`group relative flex items-center justify-between px-3.5 py-2.5 rounded-full font-mono text-xs uppercase tracking-wider transition-all duration-200 ${
                       active
-                        ? 'text-primary bg-primary/10 font-medium'
-                        : 'text-[#F5F0E8]/65 hover:text-[#F5F0E8] hover:bg-[#F5F0E8]/5'
+                        ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30 font-medium shadow-xs'
+                        : 'text-neutral-400 border border-transparent hover:text-white hover:bg-neutral-800/50'
                     }`}
                   >
-                    {active && (
-                      <span className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-0.5 rounded-full bg-primary" />
-                    )}
-                    <Icon className="h-4 w-4 shrink-0" />
-                    {label}
+                    <div className="flex items-center gap-3">
+                      <Icon className={`h-4 w-4 shrink-0 transition-colors ${active ? 'text-amber-400' : 'text-neutral-400 group-hover:text-white'}`} />
+                      <span>{label}</span>
+                    </div>
+                    {active && <ChevronRight className="h-3.5 w-3.5 text-amber-500/80" />}
                   </Link>
                 );
               })}
@@ -82,13 +99,14 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
         ))}
       </nav>
 
-      <div className="p-4 border-t border-[#F5F0E8]/10">
+      {/* Footer Navigation */}
+      <div className="p-4 border-t border-neutral-800/80">
         <Link
           href="/"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-[#F5F0E8]/65 hover:text-[#F5F0E8] hover:bg-[#F5F0E8]/5 transition-colors"
+          className="flex items-center gap-3 px-4 py-2.5 rounded-full border border-neutral-800 text-xs font-mono uppercase tracking-wider text-neutral-400 hover:text-white hover:border-neutral-700 hover:bg-neutral-800/40 transition-all"
         >
-          <ArrowLeft className="h-4 w-4 shrink-0" />
-          Back to Store
+          <ArrowLeft className="h-3.5 w-3.5 shrink-0" />
+          <span>Exit to Store</span>
         </Link>
       </div>
     </div>
@@ -101,8 +119,11 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#1A1714]">
-        <div className="text-[#F5F0E8] font-serif text-xl">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-[#121110]">
+        <div className="flex items-center gap-3 text-amber-500 font-mono text-xs uppercase tracking-widest">
+          <div className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+          Authenticating Session...
+        </div>
       </div>
     );
   }
@@ -115,12 +136,14 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
   if (!isAdmin) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center p-8">
-          <h1 className="text-4xl font-serif text-foreground mb-4">Access Denied</h1>
-          <p className="text-muted-foreground mb-6">You do not have admin privileges to view this page.</p>
-          <Button asChild variant="outline">
-            <Link href="/">Return to Site</Link>
+      <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA] text-neutral-900 px-6">
+        <div className="text-center max-w-md bg-white border border-neutral-200/90 rounded-3xl p-8 shadow-xs">
+          <h1 className="text-3xl font-serif mb-2">Access Denied</h1>
+          <p className="text-neutral-500 font-light text-sm mb-6">
+            Your account does not possess engineering or administrative clearance.
+          </p>
+          <Button asChild className="rounded-full bg-neutral-900 text-white hover:bg-amber-600 font-mono text-xs uppercase tracking-widest px-6 py-2.5 transition-colors">
+            <Link href="/">Return to Storefront</Link>
           </Button>
         </div>
       </div>
@@ -135,59 +158,72 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     .slice(0, 2);
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
+    <div className="flex h-screen bg-[#FAFAFA] text-neutral-900 overflow-hidden selection:bg-amber-500/20 selection:text-amber-900">
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-64 shrink-0 flex-col">
+      <aside className="hidden md:flex w-64 shrink-0 flex-col border-r border-neutral-800/20 shadow-xs">
         <SidebarContent />
       </aside>
 
-      {/* Main Content */}
+      {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Header */}
-        <header className="h-16 flex items-center justify-between px-6 border-b border-border bg-card shrink-0">
+        <header className="h-16 flex items-center justify-between px-6 border-b border-neutral-200/80 bg-white/80 backdrop-blur-md shrink-0 z-10">
           <div className="flex items-center gap-3">
-            {/* Mobile menu */}
+            {/* Mobile Sheet Menu */}
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden">
-                  <Menu className="h-5 w-5" />
+                <Button variant="outline" size="icon" className="md:hidden rounded-full border-neutral-200/90 hover:bg-neutral-100">
+                  <Menu className="h-4 w-4 text-neutral-700" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="p-0 w-64 bg-[#1A1714] border-0">
+              <SheetContent side="left" className="p-0 w-64 bg-[#121110] border-r border-neutral-800/80 rounded-r-3xl overflow-hidden">
                 <SidebarContent onClose={() => setMobileOpen(false)} />
               </SheetContent>
             </Sheet>
-            <span className="font-serif text-lg text-foreground font-semibold md:hidden">Admin</span>
+            <span className="font-serif text-lg text-neutral-900 font-normal md:hidden">8848 Console</span>
           </div>
 
+          {/* Action Tools & Profile */}
           <div className="flex items-center gap-3">
             <a
               href="/"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors mr-1"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-neutral-200/90 bg-neutral-50 hover:bg-neutral-100 text-[11px] font-mono uppercase tracking-wider text-neutral-600 hover:text-neutral-900 transition-all shadow-xs"
             >
-              View Store
-              <ExternalLink className="h-3 w-3" />
+              <span>Live Store</span>
+              <ExternalLink className="h-3 w-3 text-neutral-400" />
             </a>
-            <div className="flex items-center gap-2">
+
+            <div className="h-4 w-px bg-neutral-200/80 hidden sm:block" />
+
+            {/* Profile Pill */}
+            <div className="flex items-center gap-2.5 bg-neutral-50 border border-neutral-200/90 rounded-full py-1 pl-1 pr-3 shadow-xs">
               {user.avatar ? (
-                <img src={user.avatar} alt={user.name} className="h-8 w-8 rounded-full object-cover" />
+                <img src={user.avatar} alt={user.name} className="h-7 w-7 rounded-full object-cover ring-1 ring-neutral-300" />
               ) : (
-                <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-semibold">
+                <div className="h-7 w-7 rounded-full bg-neutral-900 flex items-center justify-center text-white text-[10px] font-mono font-semibold">
                   {initials}
                 </div>
               )}
-              <span className="text-sm font-medium text-foreground hidden sm:block">{user.name}</span>
+              <span className="text-xs font-mono font-medium text-neutral-800 hidden sm:inline-block">{user.name}</span>
             </div>
-            <Button variant="ghost" size="icon" onClick={logout} title="Logout">
+
+            {/* Logout Button */}
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={logout} 
+              title="Logout"
+              className="rounded-full hover:bg-red-50 hover:text-red-600 text-neutral-500 transition-colors"
+            >
               <LogOut className="h-4 w-4" />
             </Button>
           </div>
         </header>
 
-        {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-6">
+        {/* Page Content Body */}
+        <main className="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar">
           {children}
         </main>
       </div>

@@ -49,7 +49,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             </div>
           )}
         </div>
-        <span className="font-medium text-lg">${product.price.toFixed(2)}</span>
+        <span className="font-medium text-lg">Rs. {product.price.toFixed(2)}</span>
       </div>
     </motion.div>
   );

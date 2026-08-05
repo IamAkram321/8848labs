@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useEffect } from "react";
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Route, Switch, Router as WouterRouter, useLocation } from 'wouter';
@@ -7,6 +8,7 @@ import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
+
 
 // Public Pages
 import HomePage from './pages/HomePage';
@@ -79,7 +81,18 @@ const queryClient = new QueryClient({
 function AppContent() {
   const [location] = useLocation();
 
-  if (location.startsWith('/admin')) {
+  // Scroll to top whenever the route changes
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: "auto",
+      });
+    });
+  }, [location]);
+
+  if (location.startsWith("/admin")) {
     return (
       <Switch>
         <Route path="/admin" component={AdminDashboardPage} />
@@ -99,6 +112,7 @@ function AppContent() {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
+
       <main className="flex-1">
         <AnimatePresence mode="wait" initial={false}>
           <PageTransition transitionKey={location}>
@@ -132,6 +146,7 @@ function AppContent() {
           </PageTransition>
         </AnimatePresence>
       </main>
+
       <Footer />
     </div>
   );
