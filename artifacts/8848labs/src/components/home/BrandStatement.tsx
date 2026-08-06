@@ -11,8 +11,7 @@ export function BrandStatement() {
     offset: ["start 80%", "end 20%"],
   });
 
-  const words =
-    "We turn digital ideas into physical objects.".split(" ");
+  const words = "We turn digital ideas into physical objects.".split(" ");
 
   return (
     <section
@@ -33,12 +32,10 @@ export function BrandStatement() {
         <source src="/videos/printing.mp4" type="video/mp4" />
       </video>
 
-      {/* Dark overlay */}
+      {/* Dark overlay with enhanced opacity for contrast */}
+      <div className="absolute inset-0 bg-black/65" />
 
-      <div className="absolute inset-0 bg-black/55" />
-
-      {/* Bronze gradient */}
-
+      {/* Bronze gradient accent */}
       <div
         className="absolute inset-0"
         style={{
@@ -47,45 +44,41 @@ export function BrandStatement() {
         }}
       />
 
-      {/* Slight blur for readability */}
-
-      <div className="absolute inset-0 backdrop-blur-[0.5px]" />
+      {/* Backdrop blur layer */}
+      <div className="absolute inset-0 backdrop-blur-[1px]" />
 
       {/* ===========================
           CONTENT
       ============================ */}
 
       <div className="container relative z-10 mx-auto max-w-6xl px-6">
-
-        <div className="max-w-3xl">
-
-          <h2 className="font-serif text-white text-5xl md:text-7xl lg:text-8xl leading-[1.05]">
-
+        <div className="max-w-4xl">
+          <h2 className="font-serif text-white text-5xl md:text-7xl lg:text-8xl leading-[1.05] drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]">
             {words.map((word, i) => {
-
               const start = i / words.length;
               const end = start + 1 / words.length;
 
+              // Raised lower bound from 0.15 to 0.45 for clear initial readability
               const opacity = useTransform(
                 scrollYProgress,
                 [start, end],
-                [0.15, 1]
+                [0.45, 1]
               );
 
               const y = useTransform(
                 scrollYProgress,
                 [start, end],
-                [25, 0]
+                [15, 0]
               );
 
               return (
                 <motion.span
                   key={i}
                   style={{ opacity, y }}
-                  className="inline-block mr-4"
+                  className="inline-block mr-3 md:mr-5"
                 >
                   {word === "ideas" || word === "objects." ? (
-                    <span className="italic text-primary">
+                    <span className="italic text-amber-400 font-medium drop-shadow-[0_2px_8px_rgba(251,191,36,0.3)]">
                       {word}
                     </span>
                   ) : (
@@ -94,7 +87,6 @@ export function BrandStatement() {
                 </motion.span>
               );
             })}
-
           </h2>
 
           <motion.p
@@ -102,7 +94,7 @@ export function BrandStatement() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.35 }}
-            className="mt-12 max-w-2xl text-lg md:text-xl leading-9 text-white/80"
+            className="mt-12 max-w-2xl text-lg md:text-xl leading-9 text-neutral-200 drop-shadow-sm"
           >
             Every object begins as a thought. At 8848LABS, we treat
             additive manufacturing as precision engineering.
@@ -118,9 +110,7 @@ export function BrandStatement() {
             transition={{ delay: 0.6 }}
             className="mt-14"
           >
-
             <Link href="/custom-studio">
-
               <button
                 className="
                 group
@@ -129,34 +119,30 @@ export function BrandStatement() {
                 gap-3
                 rounded-full
                 border
-                border-primary
-                bg-primary/10
+                border-amber-400/60
+                bg-amber-500/20
                 backdrop-blur-md
                 px-8
                 py-4
                 uppercase
                 tracking-[0.28em]
                 text-xs
-                text-white
+                font-semibold
+                text-amber-300
                 transition-all
-                hover:bg-primary
+                hover:bg-amber-400
                 hover:text-black
+                hover:border-amber-400
+                shadow-lg
               "
               >
                 Start Your Project
-
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-
               </button>
-
             </Link>
-
           </motion.div>
-
         </div>
-
       </div>
-
     </section>
   );
 }

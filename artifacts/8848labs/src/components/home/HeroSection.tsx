@@ -93,16 +93,6 @@ export function HeroSection() {
       >
         {/* Left Content Column */}
         <div className="flex-1 flex flex-col justify-center pt-24 md:pt-0 z-20 max-w-2xl">
-          
-          {/* Top Editorial Badge */}
-          <motion.div variants={heroItem} className="mb-6 inline-flex items-center">
-            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/80 border border-neutral-200/90 shadow-sm backdrop-blur-md">
-              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
-              <span className="font-mono text-[11px] font-semibold uppercase tracking-wider text-neutral-600">
-                01 / Digital to Physical
-              </span>
-            </div>
-          </motion.div>
 
           {/* Headline */}
           <motion.h1
