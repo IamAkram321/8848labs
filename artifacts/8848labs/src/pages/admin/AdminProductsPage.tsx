@@ -38,6 +38,16 @@ const emptyForm: ProductForm = {
   model3dUrl: '',
 };
 
+const DEFAULT_CATEGORIES = [
+  'Door Nameplates',
+  'Keychains',
+  'Wall Art',
+  'Lithophanes',
+  'Miniatures',
+  'Engineering Parts',
+  'Home Decor',
+];
+
 export default function AdminProductsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -52,6 +62,21 @@ export default function AdminProductsPage() {
   const [isUploadingModel, setIsUploadingModel] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const modelInputRef = useRef<HTMLInputElement>(null);
+
+  // Fetch categories from database endpoint
+  const { data: categoriesData } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const res = await fetch(`${API_URL}/api/categories`);
+      if (!res.ok) throw new Error('Failed to fetch categories');
+      return res.json();
+    },
+  });
+
+  const availableCategories: string[] =
+    categoriesData?.categories && Array.isArray(categoriesData.categories)
+      ? categoriesData.categories.map((c: any) => typeof c === 'string' ? c : c.name || c.slug)
+      : DEFAULT_CATEGORIES;
 
   const handleModelSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -189,7 +214,10 @@ export default function AdminProductsPage() {
 
   const openAdd = () => {
     setEditProduct(null);
-    setForm(emptyForm);
+    setForm({
+      ...emptyForm,
+      category: availableCategories[0] ?? '',
+    });
     setDialogOpen(true);
   };
 
@@ -199,7 +227,7 @@ export default function AdminProductsPage() {
       name: product.name ?? '',
       price: product.price != null ? String(product.price) : '',
       compareAtPrice: product.compareAtPrice != null ? String(product.compareAtPrice) : '',
-      category: product.category ?? '',
+      category: product.category ?? (availableCategories[0] ?? ''),
       description: product.description ?? '',
       shortDescription: product.shortDescription ?? '',
       stock: product.stock != null ? String(product.stock) : '',
@@ -422,7 +450,20 @@ export default function AdminProductsPage() {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
                 <label className="text-sm font-medium">Category</label>
-                <Input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="e.g. Figurines" />
+                <select
+                  value={form.category}
+                  onChange={(e) => setForm({ ...form, category: e.target.value })}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {form.category && !availableCategories.includes(form.category) && (
+                    <option value={form.category}>{form.category}</option>
+                  )}
+                  {availableCategories.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="space-y-1">
                 <label className="text-sm font-medium">Stock</label>

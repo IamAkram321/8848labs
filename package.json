@@ -10,6 +10,7 @@
   "private": true,
   "devDependencies": {
     "prettier": "^3.9.4",
+    "tsx": "catalog:",
     "typescript": "~5.9.3"
   }
 }
