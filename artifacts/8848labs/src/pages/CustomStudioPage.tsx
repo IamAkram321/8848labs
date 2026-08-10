@@ -173,9 +173,9 @@ export default function CustomStudioPage() {
       
       {/* Background Mesh */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -right-20 top-1/4 w-[650px] h-[650px] rounded-full bg-gradient-to-br from-amber-200/20 via-orange-100/20 to-transparent blur-[140px]" />
-        <div className="absolute left-10 bottom-20 w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-amber-300/15 via-amber-100/25 to-transparent blur-[150px]" />
-        <div className="absolute inset-0 bg-[radial-gradient(#000000_1px,transparent_1px)] [background-size:36px_36px] opacity-[0.025]" />
+        <div className="absolute -right-20 top-1/4 w-162.5 h-162.5 rounded-full bg-linear-to-br from-amber-200/20 via-orange-100/20 to-transparent blur-[140px]" />
+        <div className="absolute left-10 bottom-20 w-125 h-125 rounded-full bg-linear-to-tr from-amber-300/15 via-amber-100/25 to-transparent blur-[150px]" />
+        <div className="absolute inset-0 bg-[radial-gradient(#000000_1px,transparent_1px)] bg-size-[36px_36px] opacity-[0.025]" />
       </div>
 
       <div className="container mx-auto px-6 md:px-12 relative z-10 max-w-4xl">
@@ -522,7 +522,7 @@ export default function CustomStudioPage() {
                         name="fullName" 
                         value={formData.fullName} 
                         onChange={handleChange}
-                        placeholder="MD Akram"
+                        placeholder="Your full name"
                         className="w-full bg-white/80 backdrop-blur-md border border-neutral-200/90 rounded-full px-5 py-3 text-xs font-mono focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 transition-all shadow-xs"
                       />
                     </div>
@@ -534,7 +534,7 @@ export default function CustomStudioPage() {
                         name="email" 
                         value={formData.email} 
                         onChange={handleChange}
-                        placeholder="akram@example.com"
+                        placeholder="your@example.com"
                         className="w-full bg-white/80 backdrop-blur-md border border-neutral-200/90 rounded-full px-5 py-3 text-xs font-mono focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 transition-all shadow-xs"
                       />
                     </div>
