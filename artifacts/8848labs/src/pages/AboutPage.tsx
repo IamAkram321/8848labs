@@ -37,20 +37,30 @@ export default function AboutPage() {
       <div className="container mx-auto px-6 md:px-12 relative z-10 max-w-5xl">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-12">
+        <div className="text-center max-w-3xl mx-auto mb-8">
           <SectionHeading title="Our Story" label="01 / Studio Manifesto" align="center" />
         </div>
 
-        {/* Venture Tagline Badge */}
+        {/* Venture Logo & Tagline Header */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="flex justify-center mb-8"
+          className="flex flex-col items-center justify-center gap-3 mb-12"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 border border-neutral-200 shadow-xs backdrop-blur-md">
-            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-            <span className="font-mono text-xs font-medium uppercase tracking-wider text-neutral-600">
+          {/* Prominent Logo Badge */}
+          <div className="p-3 rounded-2xl bg-white border border-neutral-200/80 shadow-sm backdrop-blur-md">
+            <img
+              src="/images/pathak-and-sons.png"
+              alt="Pathak and Sons Logo"
+              className="h-16 md:h-20 w-auto object-contain"
+            />
+          </div>
+
+          {/* Clean Sub-text Pill */}
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 border border-neutral-200/80 shadow-2xs backdrop-blur-md">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+            <span className="font-mono text-xs font-medium uppercase tracking-widest text-neutral-600">
               A Venture of Pathak and Sons
             </span>
           </div>
