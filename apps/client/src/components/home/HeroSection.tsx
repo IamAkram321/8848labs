@@ -4,7 +4,7 @@ import { Link } from 'wouter';
 import { ArrowRight, ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import { Magnetic } from '@/components/ui/Magnetic';
 
-// High-quality showcase items for 8848 Labs
+
 const heroSlides = [
   {
     id: 1,
@@ -196,7 +196,7 @@ export function HeroSection() {
             </AnimatePresence>
 
             {/* Gradient Overlay for Text Legibility */}
-            <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/80 via-neutral-950/20 to-transparent pointer-events-none z-10" />
+            <div className="absolute inset-0 bg-linear-to-t from-neutral-950/80 via-neutral-950/20 to-transparent pointer-events-none z-10" />
 
             {/* Slide Details & Control */}
             <div className="absolute bottom-6 left-6 right-6 z-20 flex items-end justify-between">
