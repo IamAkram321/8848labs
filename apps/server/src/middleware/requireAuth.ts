@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 
-/** Requires a valid logged-in session. Returns 401 otherwise. */
+// Ensures request is authenticated via active session
 export function requireAuth(req: Request, res: Response, next: NextFunction): void {
   if (!req.session?.userId) {
     res.status(401).json({ error: "Authentication required" });
@@ -9,8 +9,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
   next();
 }
 
-/** Requires ADMIN role. Must be used after requireAuth.
- *  Role is validated server-side from the session — never trust client input. */
+// Restricts route access to admin users
 export function requireAdmin(req: Request, res: Response, next: NextFunction): void {
   if (!req.session?.userId) {
     res.status(401).json({ error: "Authentication required" });

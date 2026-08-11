@@ -10,14 +10,10 @@ import router from "./routes";
 import { logger } from "./lib/logger";
 import { pool } from "@workspace/db";
 
-// Registers passport strategies
 import "./routes/auth";
 
 const app: Express = express();
 
-// Security headers (X-Content-Type-Options, X-Frame-Options, a reasonable
-// default Content-Security-Policy, etc.). This app serves a JSON API only —
-// no server-rendered HTML — so the defaults are safe with no extra tuning.
 app.use(helmet());
 
 app.use(
@@ -40,23 +36,17 @@ app.use(
   })
 );
 
-// Required when running behind Render's proxy
 app.set("trust proxy", 1);
 
-// CORS
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      process.env.FRONTEND_URL!,
-    ],
+    origin: ["http://localhost:5173", process.env.FRONTEND_URL!],
     credentials: true,
   })
 );
 
 app.use(cookieParser());
 
-// Session
 const PgSession = connectPgSimple(session);
 
 app.use(
@@ -64,18 +54,10 @@ app.use(
     store: new PgSession({
       pool,
       tableName: "session",
-      // NOTE: deliberately false. With createTableIfMissing: true,
-      // connect-pg-simple tries to read a table.sql file bundled inside its
-      // own package at runtime — but esbuild bundles this whole app into a
-      // single dist/index.mjs and doesn't copy that non-JS asset along with
-      // it, so that read fails in production (ENOENT). The session table is
-      // created once manually instead (see the SQL migration).
       createTableIfMissing: false,
     }),
 
-    secret:
-      process.env.SESSION_SECRET ??
-      "fallback-dev-secret-change-me",
+    secret: process.env.SESSION_SECRET ?? "fallback-dev-secret-change-me",
 
     resave: false,
     saveUninitialized: false,
@@ -86,10 +68,7 @@ app.use(
     cookie: {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite:
-        process.env.NODE_ENV === "production"
-          ? "none"
-          : "lax",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     },
   })

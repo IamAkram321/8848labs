@@ -28,12 +28,7 @@ function getCallbackURL(): string {
   return `${getBackendURL()}/api/auth/google/callback`;
 }
 
-// ---------------------------------------------------------------------------
-// Google-verified accounts are
-// email-verified from the moment they're created, since Google already
-// confirmed ownership of that inbox.
-// ---------------------------------------------------------------------------
-
+// Setup Google OAuth strategy if keys are present
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
   passport.use(
     new GoogleStrategy(
@@ -56,9 +51,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
           let user = existing[0];
 
           if (!user) {
-            // If an account with this email already exists (e.g. they signed
-            // up with a password first), link this Google identity to it
-            // instead of creating a duplicate account for the same person.
+            // Check if user already registered via email to link their Google profile
             const byEmail = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
 
             if (byEmail[0]) {
@@ -81,7 +74,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
                   name: profile.displayName ?? email,
                   avatar: profile.photos?.[0]?.value ?? null,
                   emailVerified: true,
-                  role: "CUSTOMER", // ADMIN role is ONLY assigned via direct DB access
+                  role: "CUSTOMER",
                 })
                 .returning();
               user = inserted[0];
@@ -92,7 +85,6 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
               .set({
                 name: profile.displayName ?? user.name,
                 avatar: profile.photos?.[0]?.value ?? user.avatar,
-                // Never update role via OAuth
               })
               .where(eq(usersTable.id, user.id));
           }
@@ -148,21 +140,12 @@ router.get(
   }
 );
 
-// ---------------------------------------------------------------------------
-// Email/password auth
-// ---------------------------------------------------------------------------
-
+// Account security parameters
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-// Per-account thresholds (separate from the per-IP limiters in authLimiter.ts).
 const MAX_FAILED_ATTEMPTS = 5;
-const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes
+const LOCKOUT_DURATION_MS = 15 * 60 * 1000;
 const CAPTCHA_REQUIRED_AFTER_ATTEMPTS = 3;
 
-// Single, constant response for every "credentials were wrong" case — a
-// nonexistent email, a wrong password, an unverified-but-otherwise-correct
-// login... all get this exact string. See routes below for exactly which
-// cases share it and why.
 const GENERIC_LOGIN_ERROR = "Invalid email or password.";
 
 /** POST /api/auth/signup */
@@ -189,20 +172,13 @@ router.post("/auth/signup", signupLimiter, async (req: Request, res: Response): 
       return;
     }
 
-    // Always hash the password, on every branch, before checking whether the
-    // account exists. This keeps the "new account" and "already exists"
-    // branches equal in wall-clock time — the hash is the slow, deliberately
-    // expensive step, and skipping it on one branch only would create a
-    // measurable timing side-channel an attacker could use to detect which
-    // emails already have accounts.
+    // Always run hash function to prevent timing attacks on email lookups
     const passwordHash = await hashPassword(password);
 
     const existing = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
 
     if (existing[0]) {
-      // SECURITY: do NOT tell the caller this email is taken. Notify the
-      // real account owner instead, and return the exact same response as
-      // the success path below.
+      // Send alert email to existing owner without exposing account presence to API response
       void sendAccountAlreadyExistsEmail(existing[0].email, existing[0].name);
     } else {
       const inserted = await db
@@ -221,7 +197,6 @@ router.post("/auth/signup", signupLimiter, async (req: Request, res: Response): 
       void sendVerificationEmail(user.email, user.name, rawToken);
     }
 
-    // Identical response, identical wording, regardless of which branch ran.
     res.status(200).json({
       message: "If that email address is available, we've sent instructions to confirm your account.",
     });
@@ -261,7 +236,7 @@ router.get("/auth/verify-email", async (req: Request, res: Response): Promise<vo
 
     await db.update(usersTable).set({ emailVerified: true }).where(eq(usersTable.id, row.userId));
 
-    // Single-use: delete immediately so this exact link can never work again.
+    // Remove token after use
     await db.delete(emailVerificationTokensTable).where(eq(emailVerificationTokensTable.id, row.id));
 
     res.redirect(`${getFrontendURL()}/verify-email?status=success`);
@@ -286,10 +261,7 @@ router.post("/auth/login", loginLimiter, async (req: Request, res: Response): Pr
 
     const [user] = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
 
-    // SECURITY: no such user, OR a Google-only account with no password set —
-    // both dummy-compare against a fixed hash and return the exact same
-    // generic error as a real wrong-password attempt. Never reveal which of
-    // "no account", "no password set", or "wrong password" actually happened.
+    // Dummy compare to avoid timing enumeration on missing users or passwordless accounts
     if (!user || !user.passwordHash) {
       await verifyPassword(password, DUMMY_HASH_FOR_TIMING_SAFETY);
       res.status(401).json({ error: GENERIC_LOGIN_ERROR });
@@ -298,16 +270,10 @@ router.post("/auth/login", loginLimiter, async (req: Request, res: Response): Pr
 
     const isLocked = user.lockedUntil && user.lockedUntil.getTime() > Date.now();
     if (isLocked) {
-      // Same generic message — do not reveal that lockout is the specific
-      // reason, only that the attempt failed.
       res.status(401).json({ error: GENERIC_LOGIN_ERROR });
       return;
     }
 
-    // Once an account has racked up enough recent failures, require a valid
-    // CAPTCHA to even attempt the password check. Failing the CAPTCHA gets
-    // the exact same generic response as a wrong password — an attacker
-    // never learns that CAPTCHA-gating is what's blocking them.
     if (user.failedLoginAttempts >= CAPTCHA_REQUIRED_AFTER_ATTEMPTS) {
       const captchaOk = await verifyCaptcha(captchaToken);
       if (!captchaOk) {
@@ -335,18 +301,11 @@ router.post("/auth/login", loginLimiter, async (req: Request, res: Response): Pr
     }
 
     if (!user.emailVerified) {
-      // This is a deliberate, narrow exception to "identical responses":
-      // the password WAS correct, so the caller has already proven they
-      // control these credentials — telling them "verify your email" here
-      // doesn't hand an attacker anything they don't already have (a
-      // correct password for this exact account). Blocking this message
-      // entirely would make it impossible for legitimate users to
-      // understand why login isn't working.
       res.status(403).json({ error: "Please verify your email before logging in. Check your inbox for the link." });
       return;
     }
 
-    // Success: reset lockout counters and establish the session.
+    // Reset attempt counters on successful login
     await db
       .update(usersTable)
       .set({ failedLoginAttempts: 0, lockedUntil: null })
@@ -385,16 +344,13 @@ router.post("/auth/forgot-password", forgotPasswordLimiter, async (req: Request,
         await db.insert(passwordResetTokensTable).values({
           userId: user.id,
           tokenHash: hashToken(rawToken),
-          expiresAt: tokenExpiryDate(1), // 1 hour, as required
+          expiresAt: tokenExpiryDate(1),
         });
 
         void sendPasswordResetEmail(user.email, user.name, rawToken);
       }
-      // No else branch that reveals anything — whether or not a user was
-      // found, we fall through to the exact same response below.
     }
 
-    // SECURITY: identical response whether or not the email exists.
     res.status(200).json({
       message: "If an account exists for that email, we've sent password reset instructions.",
     });
@@ -448,8 +404,7 @@ router.post("/auth/reset-password", resetPasswordLimiter, async (req: Request, r
       .set({ passwordHash, failedLoginAttempts: 0, lockedUntil: null })
       .where(eq(usersTable.id, user.id));
 
-    // Single-use: mark used immediately so this exact token can never be
-    // replayed, even within its expiry window.
+    // Mark reset token as used
     await db.update(passwordResetTokensTable).set({ used: true }).where(eq(passwordResetTokensTable.id, row.id));
 
     void sendPasswordChangedEmail(user.email, user.name);

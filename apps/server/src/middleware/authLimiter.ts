@@ -1,20 +1,6 @@
 import rateLimit from "express-rate-limit";
 
-/**
- * Per-IP rate limits on auth endpoints. These are a DIFFERENT layer of
- * defense from the per-account lockout in routes/auth.ts:
- *   - This file: stops one IP from hammering ANY/ALL accounts
- *     (credential stuffing, distributed guessing across many emails).
- *   - Per-account lockout: stops repeated guesses against ONE specific
- *     account, even if the attacker rotates IPs.
- * You need both — either alone leaves a gap.
- *
- * NOTE: this is in-memory (express-rate-limit's default store), which is
- * fine for a single server instance. If this ever runs across multiple
- * instances/processes (e.g. horizontal scaling on Render), swap the store
- * for a shared one (e.g. rate-limit-redis) or these limits reset per-instance.
- */
-
+// Rate limiting setup for authentication endpoints
 const commonOptions = {
   standardHeaders: true,
   legacyHeaders: false,
