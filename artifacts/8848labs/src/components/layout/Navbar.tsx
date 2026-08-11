@@ -74,27 +74,18 @@ export function Navbar() {
       >
         <div className="px-5 sm:px-8 flex items-center justify-between h-14 sm:h-16">
 
-          {/* Transparent-Blend Logo Section */}
+          {/* Logo Section */}
           <Link
             href="/"
-            className="group flex items-center gap-3 transition-all duration-300 hover:opacity-90"
+            className="group flex items-center transition-all duration-300 hover:opacity-90"
           >
             <div className="relative flex items-center justify-center">
               <img
                 src="/images/logo.png"
                 alt="8848LABS Logo"
-                className={`w-auto object-contain transition-all duration-300 mix-blend-multiply filter contrast-125 brightness-95 ${isSolid ? "h-16 sm:h-20 lg:h-24" : "h-20 sm:h-24 lg:h-28"
+                className={`w-auto object-contain transition-all duration-300 mix-blend-multiply filter contrast-125 brightness-95 ${isSolid ? "h-12 sm:h-14 lg:h-16" : "h-14 sm:h-16 lg:h-20"
                   }`}
               />
-            </div>
-
-            <div className="flex flex-col justify-center">
-              <span className="font-serif text-lg font-semibold tracking-[0.18em] text-neutral-900 leading-none">
-                8848<span className="text-amber-500 font-bold">LABS</span>
-              </span>
-              <span className="text-[9px] font-mono tracking-[0.25em] text-neutral-500 uppercase mt-1">
-                Additive Studio
-              </span>
             </div>
           </Link>
 
@@ -136,7 +127,7 @@ export function Navbar() {
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     exit={{ scale: 0 }}
-                    className="absolute -top-1.5 -right-1.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold shadow-[0_2px_8px_rgba(245,158,11,0.4)]"
+                    className="absolute -top-1.5 -right-1.5 bg-linear-to-r from-amber-500 to-amber-600 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold shadow-[0_2px_8px_rgba(245,158,11,0.4)]"
                   >
                     {cartItemCount}
                   </motion.span>
