@@ -119,15 +119,20 @@ export function Footer() {
           
           {/* Brand Info (Left) */}
           <div className="lg:col-span-5 space-y-8">
-            <div className="flex items-center gap-4">
-              <img
-                src="/logo.jpeg"
-                alt="8848LABS Logo"
-                className="h-14 w-auto rounded-lg border border-white/10 p-1 bg-black/50 backdrop-blur-md"
-              />
-              <span className="font-serif text-2xl font-light tracking-widest text-white uppercase">
-                8848<span className="text-amber-400 font-normal">LABS</span>
-              </span>
+            <div className="space-y-2">
+              <div className="flex items-center gap-4">
+                <img
+                  src="/logo.jpeg"
+                  alt="8848LABS Logo"
+                  className="h-14 w-auto rounded-lg border border-white/10 p-1 bg-black/50 backdrop-blur-md"
+                />
+                <span className="font-serif text-2xl font-light tracking-widest text-white uppercase">
+                  8848<span className="text-amber-400 font-normal">LABS</span>
+                </span>
+              </div>
+              <p className="text-xs font-mono uppercase tracking-[0.25em] text-amber-400/90 pl-1 font-medium">
+                A Venture of Pathak and Sons
+              </p>
             </div>
 
             <p className="text-neutral-400 leading-relaxed text-sm max-w-md font-light">
