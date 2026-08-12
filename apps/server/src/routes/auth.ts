@@ -21,19 +21,28 @@ function getBackendURL(): string {
   return rawUrl.trim().replace(/\/$/, "");
 }
 
-function getFrontendURL(req?: Request): string {
-  if (req) {
-    const origin = req.headers.origin || (req.headers.referer ? new URL(req.headers.referer).origin : null);
-    
-    // Check if the origin matches allowed frontend origins (exclude google.com)
-    if (origin && !origin.includes("google.com")) {
-      return origin.trim().replace(/\/$/, "");
-    }
-  }
-
+/**
+ * Returns the primary frontend URL configured in environment variables.
+ * Used for OAuth redirects to guarantee external providers never supply the destination domain.
+ */
+function getFrontendURL(): string {
   const rawUrl = process.env.FRONTEND_URL || "http://localhost:5173";
   const firstUrl = rawUrl.split(",")[0].trim();
   return firstUrl.replace(/\/$/, "");
+}
+
+/**
+ * Dynamically resolves the origin for general API requests (e.g. email links).
+ * Filters out external auth providers like google.com.
+ */
+function getRequestOrigin(req: Request): string {
+  const origin = req.headers.origin || (req.headers.referer ? new URL(req.headers.referer).origin : null);
+
+  if (origin && !origin.includes("google.com")) {
+    return origin.trim().replace(/\/$/, "");
+  }
+
+  return getFrontendURL();
 }
 
 function getCallbackURL(): string {
@@ -150,13 +159,10 @@ router.get(
 
 router.get(
   "/auth/google/callback",
-  (req: Request, res: Response, next: NextFunction) => {
-    const frontendUrl = getFrontendURL(req);
-    passport.authenticate("google", { failureRedirect: `${frontendUrl}/?auth=failed` })(req, res, next);
-  },
+  passport.authenticate("google", { failureRedirect: `${getFrontendURL()}/?auth=failed` }),
   (req: Request, res: Response): void => {
     const user = req.user as { id: number; role: string } | undefined;
-    const frontendUrl = getFrontendURL(req);
+    const frontendUrl = getFrontendURL();
 
     if (!user) {
       res.redirect(`${frontendUrl}/?auth=failed`);
@@ -166,7 +172,7 @@ router.get(
     req.session.userId = user.id;
     req.session.userRole = user.role;
 
-    // Save session to PostgreSQL BEFORE executing browser redirect
+    // Explicitly save the session to PostgreSQL before redirecting
     req.session.save((err) => {
       if (err) {
         console.error("[auth/google/callback] Session save failed:", err);
@@ -249,7 +255,7 @@ router.get("/auth/verify-email", async (req: Request, res: Response): Promise<vo
   const rawToken = typeof req.query.token === "string" ? req.query.token : "";
 
   if (!rawToken) {
-    res.redirect(`${getFrontendURL(req)}/verify-email?status=invalid`);
+    res.redirect(`${getRequestOrigin(req)}/verify-email?status=invalid`);
     return;
   }
 
@@ -268,7 +274,7 @@ router.get("/auth/verify-email", async (req: Request, res: Response): Promise<vo
       .limit(1);
 
     if (!row) {
-      res.redirect(`${getFrontendURL(req)}/verify-email?status=invalid`);
+      res.redirect(`${getRequestOrigin(req)}/verify-email?status=invalid`);
       return;
     }
 
@@ -276,10 +282,10 @@ router.get("/auth/verify-email", async (req: Request, res: Response): Promise<vo
 
     await db.delete(emailVerificationTokensTable).where(eq(emailVerificationTokensTable.id, row.id));
 
-    res.redirect(`${getFrontendURL(req)}/verify-email?status=success`);
+    res.redirect(`${getRequestOrigin(req)}/verify-email?status=success`);
   } catch (err) {
     console.error("[auth/verify-email]", err);
-    res.redirect(`${getFrontendURL(req)}/verify-email?status=invalid`);
+    res.redirect(`${getRequestOrigin(req)}/verify-email?status=invalid`);
   }
 });
 
