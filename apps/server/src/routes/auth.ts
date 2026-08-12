@@ -17,11 +17,15 @@ import { signupLimiter, loginLimiter, forgotPasswordLimiter, resetPasswordLimite
 const router = Router();
 
 function getBackendURL(): string {
-  return process.env.BACKEND_URL || "http://localhost:8080";
+  const rawUrl = process.env.BACKEND_URL || "http://localhost:8080";
+  return rawUrl.trim().replace(/\/$/, "");
 }
 
 function getFrontendURL(): string {
-  return process.env.FRONTEND_URL || "http://localhost:5173";
+  const rawUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+  // Extract the primary domain if multiple comma-separated URLs exist
+  const firstUrl = rawUrl.split(",")[0].trim();
+  return firstUrl.replace(/\/$/, "");
 }
 
 function getCallbackURL(): string {
