@@ -38,9 +38,33 @@ app.use(
 
 app.set("trust proxy", 1);
 
+// Parse FRONTEND_URL dynamically (supports comma-separated values and removes trailing slashes)
+const envOrigins = process.env.FRONTEND_URL
+  ? process.env.FRONTEND_URL.split(",")
+      .map((url) => url.trim().replace(/\/$/, ""))
+      .filter(Boolean)
+  : [];
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://8848labs.pathaksons.com",
+  ...envOrigins,
+];
+
 app.use(
   cors({
-    origin: ["http://localhost:5173", process.env.FRONTEND_URL!],
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g., Postman, mobile apps, or server-to-server calls)
+      if (!origin) return callback(null, true);
+
+      const normalizedOrigin = origin.trim().replace(/\/$/, "");
+
+      if (allowedOrigins.includes(normalizedOrigin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`CORS blocked for origin: ${origin}`));
+      }
+    },
     credentials: true,
   })
 );
