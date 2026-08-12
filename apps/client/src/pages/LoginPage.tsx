@@ -6,10 +6,9 @@ import { useToast } from '@/hooks/use-toast';
 import { API_URL } from '@/lib/api-url';
 
 const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY as string | undefined;
+
 // Client-side heuristic only — the server independently enforces its own
-// CAPTCHA requirement once an account has failed enough real attempts. This
-// local counter just decides when to proactively show the widget so a
-// legitimate user isn't surprised by a hidden server-side gate.
+// CAPTCHA requirement once an account has failed enough real attempts.
 const SHOW_CAPTCHA_AFTER_FAILURES = 2;
 
 function GoogleIcon() {
@@ -48,8 +47,9 @@ export default function LoginPage() {
 
     try {
       const captchaToken = captchaRef.current?.getValue() || undefined;
+      const baseUrl = API_URL.replace(/\/$/, '');
 
-      const res = await fetch(`${API_URL}/api/auth/login`, {
+      const res = await fetch(`${baseUrl}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -71,6 +71,11 @@ export default function LoginPage() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleGoogleSignIn = () => {
+    const baseUrl = API_URL.replace(/\/$/, '');
+    window.location.href = `${baseUrl}/api/auth/google`;
   };
 
   return (
@@ -146,9 +151,7 @@ export default function LoginPage() {
         </div>
 
         <button
-          onClick={() => {
-            window.location.href = `${API_URL}/api/auth/google`;
-          }}
+          onClick={handleGoogleSignIn}
           disabled={isLoading}
           className="w-full flex items-center justify-center gap-3 rounded-lg border border-border bg-card px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-60"
         >

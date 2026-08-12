@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { API_URL as ENV_API_URL } from '@/lib/api-url';
 
 export interface User {
   id: number;
@@ -23,7 +24,7 @@ const AuthContext = createContext<AuthContextType>({
   logout: async () => {},
 });
 
-const API_URL = import.meta.env.VITE_API_URL || '';
+const API_URL = (ENV_API_URL || import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -45,11 +46,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logout = async () => {
-    await fetch(`${API_URL}/api/auth/logout`, {
-      method: 'POST',
-      credentials: 'include',
-    });
-    window.location.href = '/';
+    try {
+      await fetch(`${API_URL}/api/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch {
+      // Proceed with local logout cleanup even if network call fails
+    } finally {
+      setUser(null);
+      window.location.href = '/';
+    }
   };
 
   const isAdmin = user?.role === 'ADMIN';
