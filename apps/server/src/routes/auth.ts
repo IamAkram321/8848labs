@@ -24,7 +24,9 @@ function getBackendURL(): string {
 function getFrontendURL(req?: Request): string {
   if (req) {
     const origin = req.headers.origin || (req.headers.referer ? new URL(req.headers.referer).origin : null);
-    if (origin) {
+    
+    // Check if the origin matches allowed frontend origins (exclude google.com)
+    if (origin && !origin.includes("google.com")) {
       return origin.trim().replace(/\/$/, "");
     }
   }
