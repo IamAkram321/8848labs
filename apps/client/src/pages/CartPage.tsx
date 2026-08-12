@@ -64,7 +64,7 @@ export default function CartPage() {
         
         {/* Ambient Backdrops */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-gradient-to-br from-amber-200/20 via-orange-100/20 to-transparent blur-[140px]" />
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-125 h-125 rounded-full bg-linear-to-br from-amber-200/20 via-orange-100/20 to-transparent blur-[140px]" />
         </div>
 
         <motion.div
@@ -102,9 +102,9 @@ export default function CartPage() {
       
       {/* Light Mesh & Ambient Glow Backdrop */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -right-20 top-1/4 w-[650px] h-[650px] rounded-full bg-gradient-to-br from-amber-200/20 via-orange-100/20 to-transparent blur-[140px]" />
-        <div className="absolute left-10 bottom-20 w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-amber-300/15 via-amber-100/25 to-transparent blur-[150px]" />
-        <div className="absolute inset-0 bg-[radial-gradient(#000000_1px,transparent_1px)] [background-size:36px_36px] opacity-[0.025]" />
+        <div className="absolute -right-20 top-1/4 w-162.5 h-162.5 rounded-full bg-linear-to-br from-amber-200/20 via-orange-100/20 to-transparent blur-[140px]" />
+        <div className="absolute left-10 bottom-20 w-125 h-125 rounded-full bg-linear-to-tr from-amber-300/15 via-amber-100/25 to-transparent blur-[150px]" />
+        <div className="absolute inset-0 bg-[radial-gradient(#000000_1px,transparent_1px)] bg-size-[36px_36px] opacity-[0.025]" />
       </div>
 
       <div className="container mx-auto px-6 md:px-12 relative z-10 max-w-6xl">
@@ -191,7 +191,7 @@ export default function CartPage() {
                     </div>
 
                     <span className="font-serif text-lg md:text-xl font-normal text-neutral-900">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      NPR{(item.price * item.quantity).toFixed(2)}
                     </span>
                   </div>
                 </div>
@@ -216,7 +216,7 @@ export default function CartPage() {
                 <div className="flex justify-between items-center text-neutral-600">
                   <span className="uppercase tracking-wider">Subtotal</span>
                   <span className="font-semibold text-neutral-900 text-sm">
-                    ${cart?.subtotal?.toFixed(2) ?? "0.00"}
+                    NPR{cart?.subtotal?.toFixed(2) ?? "0.00"}
                   </span>
                 </div>
 

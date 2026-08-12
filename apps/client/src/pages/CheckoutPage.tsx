@@ -216,14 +216,14 @@ export default function CheckoutPage() {
                       <p className="text-xs text-muted-foreground">Qty {item.quantity}</p>
                     </div>
                     <span className="text-sm font-medium">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      NPR{(item.price * item.quantity).toFixed(2)}
                     </span>
                   </div>
                 ))}
               </div>
               <div className="border-t border-border pt-4 flex justify-between text-sm">
                 <span className="text-muted-foreground">Subtotal</span>
-                <span className="font-medium">${cart?.subtotal.toFixed(2)}</span>
+                <span className="font-medium">NPR{cart?.subtotal.toFixed(2)}</span>
               </div>
               <p className="text-xs text-muted-foreground mt-2">
                 Shipping cost confirmed at delivery.
