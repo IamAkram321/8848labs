@@ -14,7 +14,15 @@ import "./routes/auth";
 
 const app: Express = express();
 
-app.use(helmet());
+// Trust Render's reverse proxy FIRST so secure cookies & sameSite: 'none' work properly
+app.set("trust proxy", 1);
+
+// Configure Helmet to allow cross-origin credentials and session cookies
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  })
+);
 
 app.use(
   pinoHttp({
@@ -36,8 +44,6 @@ app.use(
   })
 );
 
-app.set("trust proxy", 1);
-
 // Parse FRONTEND_URL dynamically (supports comma-separated values and removes trailing slashes)
 const envOrigins = process.env.FRONTEND_URL
   ? process.env.FRONTEND_URL.split(",")
@@ -54,7 +60,6 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (e.g., Postman, mobile apps, or server-to-server calls)
       if (!origin) return callback(null, true);
 
       const normalizedOrigin = origin.trim().replace(/\/$/, "");
@@ -69,6 +74,8 @@ app.use(
   })
 );
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 const PgSession = connectPgSimple(session);
@@ -94,15 +101,13 @@ app.use(
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/",
     },
   })
 );
 
 app.use(passport.initialize());
 app.use(passport.session());
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", router);
 

@@ -21,9 +21,15 @@ function getBackendURL(): string {
   return rawUrl.trim().replace(/\/$/, "");
 }
 
-function getFrontendURL(): string {
+function getFrontendURL(req?: Request): string {
+  if (req) {
+    const origin = req.headers.origin || (req.headers.referer ? new URL(req.headers.referer).origin : null);
+    if (origin) {
+      return origin.trim().replace(/\/$/, "");
+    }
+  }
+
   const rawUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-  // Extract the primary domain if multiple comma-separated URLs exist
   const firstUrl = rawUrl.split(",")[0].trim();
   return firstUrl.replace(/\/$/, "");
 }
@@ -110,8 +116,19 @@ passport.serializeUser((user: Express.User, done) => {
 
 passport.deserializeUser(async (id: number, done) => {
   try {
-    const users = await db.select().from(usersTable).where(eq(usersTable.id, id)).limit(1);
-    done(null, users[0] ?? null);
+    const users = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.id, id))
+      .limit(1);
+
+    const user = users[0];
+
+    if (!user) {
+      return done(null, false);
+    }
+
+    done(null, user);
   } catch (err) {
     done(err);
   }
@@ -131,16 +148,33 @@ router.get(
 
 router.get(
   "/auth/google/callback",
-  passport.authenticate("google", { failureRedirect: `${getFrontendURL()}/?auth=failed` }),
+  (req: Request, res: Response, next: NextFunction) => {
+    const frontendUrl = getFrontendURL(req);
+    passport.authenticate("google", { failureRedirect: `${frontendUrl}/?auth=failed` })(req, res, next);
+  },
   (req: Request, res: Response): void => {
     const user = req.user as { id: number; role: string } | undefined;
-    if (!user) { res.redirect(`${getFrontendURL()}/?auth=failed`); return; }
+    const frontendUrl = getFrontendURL(req);
+
+    if (!user) {
+      res.redirect(`${frontendUrl}/?auth=failed`);
+      return;
+    }
 
     req.session.userId = user.id;
     req.session.userRole = user.role;
 
-    const dest = user.role === "ADMIN" ? `${getFrontendURL()}/admin` : `${getFrontendURL()}/`;
-    res.redirect(dest);
+    // Save session to PostgreSQL BEFORE executing browser redirect
+    req.session.save((err) => {
+      if (err) {
+        console.error("[auth/google/callback] Session save failed:", err);
+        res.redirect(`${frontendUrl}/?auth=failed`);
+        return;
+      }
+
+      const dest = user.role === "ADMIN" ? `${frontendUrl}/admin` : `${frontendUrl}/`;
+      res.redirect(dest);
+    });
   }
 );
 
@@ -176,13 +210,11 @@ router.post("/auth/signup", signupLimiter, async (req: Request, res: Response): 
       return;
     }
 
-    // Always run hash function to prevent timing attacks on email lookups
     const passwordHash = await hashPassword(password);
 
     const existing = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
 
     if (existing[0]) {
-      // Send alert email to existing owner without exposing account presence to API response
       void sendAccountAlreadyExistsEmail(existing[0].email, existing[0].name);
     } else {
       const inserted = await db
@@ -215,7 +247,7 @@ router.get("/auth/verify-email", async (req: Request, res: Response): Promise<vo
   const rawToken = typeof req.query.token === "string" ? req.query.token : "";
 
   if (!rawToken) {
-    res.redirect(`${getFrontendURL()}/verify-email?status=invalid`);
+    res.redirect(`${getFrontendURL(req)}/verify-email?status=invalid`);
     return;
   }
 
@@ -234,19 +266,18 @@ router.get("/auth/verify-email", async (req: Request, res: Response): Promise<vo
       .limit(1);
 
     if (!row) {
-      res.redirect(`${getFrontendURL()}/verify-email?status=invalid`);
+      res.redirect(`${getFrontendURL(req)}/verify-email?status=invalid`);
       return;
     }
 
     await db.update(usersTable).set({ emailVerified: true }).where(eq(usersTable.id, row.userId));
 
-    // Remove token after use
     await db.delete(emailVerificationTokensTable).where(eq(emailVerificationTokensTable.id, row.id));
 
-    res.redirect(`${getFrontendURL()}/verify-email?status=success`);
+    res.redirect(`${getFrontendURL(req)}/verify-email?status=success`);
   } catch (err) {
     console.error("[auth/verify-email]", err);
-    res.redirect(`${getFrontendURL()}/verify-email?status=invalid`);
+    res.redirect(`${getFrontendURL(req)}/verify-email?status=invalid`);
   }
 });
 
@@ -265,7 +296,6 @@ router.post("/auth/login", loginLimiter, async (req: Request, res: Response): Pr
 
     const [user] = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
 
-    // Dummy compare to avoid timing enumeration on missing users or passwordless accounts
     if (!user || !user.passwordHash) {
       await verifyPassword(password, DUMMY_HASH_FOR_TIMING_SAFETY);
       res.status(401).json({ error: GENERIC_LOGIN_ERROR });
@@ -309,7 +339,6 @@ router.post("/auth/login", loginLimiter, async (req: Request, res: Response): Pr
       return;
     }
 
-    // Reset attempt counters on successful login
     await db
       .update(usersTable)
       .set({ failedLoginAttempts: 0, lockedUntil: null })
@@ -318,8 +347,16 @@ router.post("/auth/login", loginLimiter, async (req: Request, res: Response): Pr
     req.session.userId = user.id;
     req.session.userRole = user.role;
 
-    res.json({
-      user: { id: user.id, email: user.email, name: user.name, avatar: user.avatar, role: user.role, createdAt: user.createdAt },
+    req.session.save((err) => {
+      if (err) {
+        console.error("[auth/login] Session save error:", err);
+        res.status(500).json({ error: "Internal server error" });
+        return;
+      }
+
+      res.json({
+        user: { id: user.id, email: user.email, name: user.name, avatar: user.avatar, role: user.role, createdAt: user.createdAt },
+      });
     });
   } catch (err) {
     console.error("[auth/login]", err);
@@ -408,7 +445,6 @@ router.post("/auth/reset-password", resetPasswordLimiter, async (req: Request, r
       .set({ passwordHash, failedLoginAttempts: 0, lockedUntil: null })
       .where(eq(usersTable.id, user.id));
 
-    // Mark reset token as used
     await db.update(passwordResetTokensTable).set({ used: true }).where(eq(passwordResetTokensTable.id, row.id));
 
     void sendPasswordChangedEmail(user.email, user.name);
@@ -431,7 +467,7 @@ router.get("/auth/me", async (req: Request, res: Response): Promise<void> => {
       .limit(1);
 
     const user = users[0];
-    if (!user) { req.session.destroy(() => {}); res.status(401).json({ user: null }); return; }
+    if (!user) { req.session.destroy(() => { }); res.status(401).json({ user: null }); return; }
     res.json({ user });
   } catch {
     res.status(500).json({ error: "Internal server error" });
