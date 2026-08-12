@@ -7,9 +7,9 @@ import { Search, SlidersHorizontal, Sparkles, Layers, RotateCcw } from "lucide-r
 
 export default function ShopPage() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState<string>("");
   const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters, setShowFilters] = useState<boolean>(false);
 
   const { data: categoriesData } = useListCategories({
     query: { queryKey: ["categories"] },
@@ -30,16 +30,23 @@ export default function ShopPage() {
   const rawProducts = productsData?.products || [];
 
   const products = selectedMaterials.length
-    ? rawProducts.filter((p) =>
-        selectedMaterials.some((mat) => p.material?.toUpperCase().includes(mat.toUpperCase()))
-      )
+    ? rawProducts.filter((p) => {
+        const productMaterials = Array.isArray(p.materials)
+          ? p.materials.join(" ")
+          : (p.materials as string) || "";
+        return selectedMaterials.some((mat: string) =>
+          productMaterials.toUpperCase().includes(mat.toUpperCase())
+        );
+      })
     : rawProducts;
 
   const categories = ["all", ...(categoriesData?.map((c) => c.name) ?? [])];
 
   const handleMaterialToggle = (material: string) => {
-    setSelectedMaterials((prev) =>
-      prev.includes(material) ? prev.filter((m) => m !== material) : [...prev, material]
+    setSelectedMaterials((prev: string[]) =>
+      prev.includes(material)
+        ? prev.filter((m: string) => m !== material)
+        : [...prev, material]
     );
   };
 
