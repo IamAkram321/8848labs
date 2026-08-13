@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Route, Switch, Router as WouterRouter, useLocation } from 'wouter';
@@ -76,6 +76,30 @@ const queryClient = new QueryClient({
 
 function AppContent() {
   const [location] = useLocation();
+  const [isFooterInView, setIsFooterInView] = useState(false);
+
+  // Pages where Navbar should be completely hidden
+  const hideNavbarRoutes = ['/login', '/signup'];
+  const isNavbarDisabled = hideNavbarRoutes.includes(location);
+
+  // Detect when footer comes into view while scrolling
+  useEffect(() => {
+    const handleScroll = () => {
+      const footerElement = document.querySelector('footer');
+      if (footerElement) {
+        const rect = footerElement.getBoundingClientRect();
+        // Hide navbar as soon as top of footer enters viewport
+        if (rect.top <= window.innerHeight) {
+          setIsFooterInView(true);
+        } else {
+          setIsFooterInView(false);
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     requestAnimationFrame(() => {
@@ -106,7 +130,12 @@ function AppContent() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Navbar />
+      {/* Hide Navbar on login/signup OR slide/fade out when scrolling into footer */}
+      {!isNavbarDisabled && (
+        <div className={`sticky top-0 z-50 transition-all duration-300 ${isFooterInView ? '-translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
+          <Navbar />
+        </div>
+      )}
 
       <main className="flex-1">
         <AnimatePresence mode="wait" initial={false}>
@@ -143,6 +172,7 @@ function AppContent() {
         </AnimatePresence>
       </main>
 
+      {/* Footer stays rendered on ALL pages including login and signup */}
       <Footer />
     </div>
   );
