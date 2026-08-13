@@ -4,10 +4,8 @@ import tailwindcss from '@tailwindcss/vite';
 import { defineConfig, loadEnv, type UserConfig } from 'vite';
 
 export default defineConfig(({ mode }): UserConfig => {
-  // Load .env / .env.local from this package's root and merge with process.env.
   const env = { ...process.env, ...loadEnv(mode, process.cwd(), '') };
 
-  // Default values for local development and cloud builds.
   const port = Number(env.PORT || 5173);
   const basePath = env.BASE_PATH || "/";
 
@@ -27,7 +25,7 @@ export default defineConfig(({ mode }): UserConfig => {
     root: path.resolve(import.meta.dirname),
 
     build: {
-      outDir: path.resolve(import.meta.dirname, 'dist'), // FIXED: Changed from 'dist/public' to 'dist'
+      outDir: path.resolve(import.meta.dirname, 'dist'),
       emptyOutDir: true,
     },
 
@@ -43,7 +41,7 @@ export default defineConfig(({ mode }): UserConfig => {
 
       proxy: {
         '/api': {
-          target: 'http://localhost:3000',
+          target: process.env.VITE_API_URL || 'http://localhost:3000',
           changeOrigin: true,
         },
       },

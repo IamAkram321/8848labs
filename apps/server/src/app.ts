@@ -14,10 +14,8 @@ import "./routes/auth";
 
 const app: Express = express();
 
-// Trust Render's reverse proxy FIRST so secure cookies & sameSite: 'none' work properly
 app.set("trust proxy", 1);
 
-// Configure Helmet to allow cross-origin credentials and session cookies
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" },
@@ -44,7 +42,6 @@ app.use(
   })
 );
 
-// Parse FRONTEND_URL dynamically (supports comma-separated values and removes trailing slashes)
 const envOrigins = process.env.FRONTEND_URL
   ? process.env.FRONTEND_URL.split(",")
       .map((url) => url.trim().replace(/\/$/, ""))
@@ -60,6 +57,7 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: (origin, callback) => {
+      // Allow server-to-server, Postman, or local curl without origin header
       if (!origin) return callback(null, true);
 
       const normalizedOrigin = origin.trim().replace(/\/$/, "");
@@ -67,10 +65,13 @@ app.use(
       if (allowedOrigins.includes(normalizedOrigin)) {
         callback(null, true);
       } else {
-        callback(new Error(`CORS blocked for origin: ${origin}`));
+        // Return false instead of instantiating an Error object
+        callback(null, false);
       }
     },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
   })
 );
 

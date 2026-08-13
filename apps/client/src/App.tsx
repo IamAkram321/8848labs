@@ -9,7 +9,6 @@ import { AuthProvider } from './context/AuthContext';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 
-
 // Public Pages
 import HomePage from './pages/HomePage';
 import ShopPage from './pages/ShopPage';
@@ -25,6 +24,8 @@ import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrdersPage from './pages/OrdersPage';
 import OrderTrackingPage from './pages/OrderTrackingPage';
+import PaymentSuccessPage from './pages/PaymentSuccessPage';
+import PaymentFailedPage from './pages/PaymentFailedPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
@@ -35,7 +36,6 @@ import TermsPage from './pages/TermsPage';
 import FAQPage from './pages/FAQPage';
 import ShippingPage from './pages/ShippingPage';
 import ReturnsPage from './pages/ReturnsPage';
-import NotFound from '@/pages/not-found';
 
 // Admin Pages
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
@@ -49,10 +49,6 @@ import AdminReviewsPage from './pages/admin/AdminReviewsPage';
 import AdminCustomersPage from './pages/admin/AdminCustomersPage';
 import AdminCustomerDetailPage from './pages/admin/AdminCustomerDetailPage';
 
-// Subtle fade + rise between storefront pages. Kept quiet and quick —
-// this should feel like the page settling into place, not a slide show.
-// Respects prefers-reduced-motion by dropping the vertical movement and
-// shortening the duration to a near-instant crossfade.
 function PageTransition({ children, transitionKey }: { children: React.ReactNode; transitionKey: string }) {
   const shouldReduceMotion = useReducedMotion();
 
@@ -81,7 +77,6 @@ const queryClient = new QueryClient({
 function AppContent() {
   const [location] = useLocation();
 
-  // Scroll to top whenever the route changes
   useEffect(() => {
     requestAnimationFrame(() => {
       window.scrollTo({
@@ -131,6 +126,8 @@ function AppContent() {
               <Route path="/checkout" component={CheckoutPage} />
               <Route path="/orders" component={OrdersPage} />
               <Route path="/orders/:id" component={OrderTrackingPage} />
+              <Route path="/payment/success" component={PaymentSuccessPage} />
+              <Route path="/payment/failed" component={PaymentFailedPage} />
               <Route path="/login" component={LoginPage} />
               <Route path="/signup" component={SignupPage} />
               <Route path="/forgot-password" component={ForgotPasswordPage} />
@@ -141,7 +138,6 @@ function AppContent() {
               <Route path="/faq" component={FAQPage} />
               <Route path="/shipping" component={ShippingPage} />
               <Route path="/returns" component={ReturnsPage} />
-              <Route component={NotFound} />
             </Switch>
           </PageTransition>
         </AnimatePresence>

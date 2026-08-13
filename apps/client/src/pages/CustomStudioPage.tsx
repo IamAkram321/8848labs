@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, X, Check, ChevronRight, ArrowLeft, FileText, Sparkles, Layers, Box, Phone, FileCheck } from 'lucide-react';
+import { Upload, X, Check, ChevronRight, ArrowLeft, FileText, Sparkles, Layers, Box, Phone, FileCheck, Info, Cpu } from 'lucide-react';
 import { useCreateCustomOrder } from '@workspace/api-client-react';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { useToast } from '@/hooks/use-toast';
@@ -70,7 +70,7 @@ export default function CustomStudioPage() {
     if (note) {
       setFailedUploadNotes((prev) => [
         ...prev,
-        `Attached file "${failedUploadFileName}" could not be uploaded (likely too large). Customer's description: ${note}`,
+        `Attached file "${failedUploadFileName}" could not be uploaded. Description: ${note}`,
       ]);
     }
     setFailedUploadOpen(false);
@@ -143,17 +143,18 @@ export default function CustomStudioPage() {
 
   if (isSubmitted) {
     return (
-      <div className="pt-32 pb-24 min-h-[80vh] flex items-center justify-center bg-[#FAFAFA] relative overflow-hidden">
-        <div className="text-center max-w-md mx-auto px-6 relative z-10">
-          <div className="w-20 h-20 bg-amber-500/10 border border-amber-600/30 rounded-full flex items-center justify-center mx-auto mb-8 shadow-xs">
-            <Check className="w-8 h-8 text-amber-800" />
+      <div className="pt-32 pb-24 min-h-[85vh] flex items-center justify-center bg-[#F4F3EF] relative overflow-hidden">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] bg-[size:32px_32px] opacity-70 pointer-events-none" />
+        <div className="text-center max-w-md mx-auto px-8 relative z-10 bg-white/90 backdrop-blur-2xl border border-neutral-200/80 p-10 rounded-3xl shadow-2xl">
+          <div className="w-16 h-16 bg-emerald-50 border border-emerald-500/30 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm">
+            <Check className="w-8 h-8 text-emerald-600" />
           </div>
-          <h2 className="font-serif text-4xl mb-4 text-neutral-900">Request Received</h2>
-          <p className="text-neutral-500 font-light text-sm mb-8">
-            Our engineers are reviewing your specifications. We'll be in touch within 24 hours with a preliminary quote and feasibility assessment.
+          <h2 className="font-serif text-3xl text-neutral-900 font-normal mb-3">Order Transmitted</h2>
+          <p className="text-neutral-500 font-light text-sm mb-8 leading-relaxed">
+            Your specs have been logged in our queue. Our engineers will follow up with technical feedback and pricing within 24 hours.
           </p>
-          <Link href="/" className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-neutral-900 text-white font-mono text-xs uppercase tracking-widest hover:bg-amber-600 transition-colors shadow-xs">
-            Return Home
+          <Link href="/" className="inline-flex items-center justify-center w-full py-3.5 rounded-2xl bg-neutral-900 text-white font-mono text-xs uppercase tracking-widest hover:bg-amber-600 transition-all duration-300 shadow-md hover:shadow-lg">
+            Back To Atelier
           </Link>
         </div>
       </div>
@@ -169,25 +170,28 @@ export default function CustomStudioPage() {
   ];
 
   return (
-    <div className="relative pt-32 pb-28 md:pb-36 bg-[#FAFAFA] text-neutral-900 min-h-screen overflow-hidden selection:bg-amber-500/20 selection:text-amber-900">
-      
-      {/* Background Mesh */}
+    <div className="relative pt-28 pb-28 bg-[#F4F3EF] text-neutral-900 min-h-screen overflow-hidden selection:bg-amber-500/20 selection:text-amber-900">
+      {/* Structural Studio Lighting & Grid Overlay */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -right-20 top-1/4 w-162.5 h-162.5 rounded-full bg-linear-to-br from-amber-200/20 via-orange-100/20 to-transparent blur-[140px]" />
-        <div className="absolute left-10 bottom-20 w-125 h-125 rounded-full bg-linear-to-tr from-amber-300/15 via-amber-100/25 to-transparent blur-[150px]" />
-        <div className="absolute inset-0 bg-[radial-gradient(#000000_1px,transparent_1px)] bg-size-[36px_36px] opacity-[0.025]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#0000000d_1px,transparent_1px),linear-gradient(to_bottom,#0000000d_1px,transparent_1px)] bg-[size:48px_48px] opacity-40" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[400px] bg-gradient-to-b from-amber-200/30 via-orange-100/10 to-transparent blur-[120px]" />
+        <div className="absolute bottom-10 right-10 w-[500px] h-[500px] bg-amber-300/15 rounded-full blur-[140px]" />
       </div>
 
-      <div className="container mx-auto px-6 md:px-12 relative z-10 max-w-4xl">
-        <SectionHeading 
-          title="Custom Studio" 
-          label="Bespoke Manufacturing"
-          align="center"
-        />
+      <div className="container mx-auto px-4 md:px-8 relative z-10 max-w-4xl">
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-600/20 font-mono text-[11px] uppercase tracking-widest text-amber-900 mb-3">
+            <Cpu className="w-3.5 h-3.5 text-amber-600" />
+            <span>Precision Studio Engineering</span>
+          </div>
+          <h1 className="font-serif text-4xl sm:text-5xl font-normal text-neutral-900 tracking-tight">
+            Custom Manufacturing
+          </h1>
+        </div>
 
-        {/* Pill Stepper Indicator */}
-        <div className="mb-12">
-          <div className="flex items-center justify-between gap-2 overflow-x-auto pb-4 pt-2">
+        {/* Floating Glass Stepper Bar */}
+        <div className="mb-8">
+          <div className="grid grid-cols-5 gap-1.5 p-2 bg-white/80 backdrop-blur-2xl border border-neutral-300/70 rounded-2xl shadow-sm">
             {stepLabels.map((s, idx) => {
               const stepNum = idx + 1;
               const isActive = step === stepNum;
@@ -199,54 +203,43 @@ export default function CustomStudioPage() {
                   key={s.title}
                   type="button"
                   onClick={() => setStep(stepNum)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full font-mono text-xs uppercase tracking-wider transition-all duration-300 shrink-0 ${
-                    isActive
-                      ? "border border-amber-600/80 bg-neutral-900 text-white shadow-xs"
+                  className={`flex items-center justify-center md:justify-start gap-2.5 py-3 px-3 rounded-xl font-mono text-xs uppercase tracking-wider transition-all duration-300 ${isActive
+                      ? "bg-neutral-900 text-white shadow-md font-medium"
                       : isCompleted
-                      ? "border border-amber-600/40 bg-amber-500/10 text-amber-900 font-semibold"
-                      : "border border-neutral-200/90 bg-white/80 text-neutral-400 hover:text-neutral-700"
-                  }`}
+                        ? "bg-amber-500/10 text-amber-900 border border-amber-500/30 font-medium"
+                        : "text-neutral-400 hover:text-neutral-800 hover:bg-neutral-100/60"
+                    }`}
                 >
-                  <StepIcon className="w-3.5 h-3.5" />
-                  <span>0{stepNum}. {s.title}</span>
-                  {isCompleted && <Check className="w-3.5 h-3.5 text-amber-600" />}
+                  <StepIcon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-amber-400' : isCompleted ? 'text-amber-600' : ''}`} />
+                  <span className="hidden md:inline truncate">{s.title}</span>
+                  {isCompleted && <Check className="w-3 h-3 ml-auto text-amber-600 hidden md:inline" />}
                 </button>
               );
             })}
           </div>
-
-          <div className="h-1 bg-neutral-200/80 w-full rounded-full overflow-hidden mt-2">
-            <motion.div 
-              className="h-full bg-amber-600 rounded-full"
-              initial={{ width: `${((step - 1) / totalSteps) * 100}%` }}
-              animate={{ width: `${(step / totalSteps) * 100}%` }}
-              transition={{ duration: 0.3 }}
-            />
-          </div>
         </div>
 
-        {/* Direct Form Layout without Container Box */}
-        <div className="relative">
+        {/* Elevating Main Card Container */}
+        <div className="bg-white/85 border border-neutral-300/80 rounded-3xl p-6 sm:p-12 backdrop-blur-2xl shadow-2xl relative">
           <form onSubmit={step === totalSteps ? handleSubmit : (e) => { e.preventDefault(); handleNext(); }}>
             <AnimatePresence mode="wait">
-              
-              {/* Step 1: Upload */}
               {step === 1 && (
                 <motion.div
                   key="step1"
-                  initial={{ opacity: 0, y: 15 }}
+                  initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -15 }}
-                  transition={{ duration: 0.3 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.2 }}
                   className="space-y-6"
                 >
-                  <div className="border-b border-neutral-200/80 pb-4 mb-6">
-                    <h3 className="font-serif text-2xl md:text-3xl font-normal text-neutral-900">Digital Assets</h3>
-                    <p className="mt-1 text-neutral-500 font-light text-sm">
-                      Upload 3D models (STL, 3MF, OBJ, GLB) or reference images. We accept napkin sketches or full CAD files.
+                  <div className="border-b border-neutral-200/80 pb-6">
+                    <span className="font-mono text-[10px] uppercase tracking-widest text-amber-700 font-semibold">Step 01 / 05</span>
+                    <h3 className="font-serif text-2xl sm:text-3xl font-normal text-neutral-900 mt-1">Digital Asset Ingestion</h3>
+                    <p className="mt-1.5 text-neutral-500 font-light text-sm leading-relaxed">
+                      Supply your 3D models or reference schematics for instant technical review.
                     </p>
                   </div>
-                  
+
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -261,23 +254,29 @@ export default function CustomStudioPage() {
                     onDragOver={(e) => { e.preventDefault(); setIsDragActive(true); }}
                     onDragLeave={() => setIsDragActive(false)}
                     onDrop={handleDrop}
-                    className={`border-2 border-dashed rounded-3xl p-10 md:p-14 text-center transition-all cursor-pointer bg-white/80 backdrop-blur-md shadow-xs ${
-                      isDragActive ? 'border-amber-600 bg-amber-500/5' : 'border-neutral-200/90 hover:border-neutral-400'
-                    }`}
+                    className={`border-2 border-dashed rounded-2xl p-8 sm:p-14 text-center transition-all duration-300 cursor-pointer ${isDragActive
+                        ? 'border-amber-600 bg-amber-500/10 shadow-inner'
+                        : 'border-neutral-300 bg-neutral-50/70 hover:border-neutral-500 hover:bg-neutral-50'
+                      }`}
                   >
-                    <Upload className="w-10 h-10 mx-auto mb-4 text-neutral-400 group-hover:text-amber-800 transition-colors" />
+                    <div className="w-14 h-14 rounded-2xl bg-white border border-neutral-200/90 flex items-center justify-center mx-auto mb-4 shadow-sm group-hover:scale-105 transition-transform">
+                      <Upload className="w-6 h-6 text-amber-600" />
+                    </div>
                     <p className="font-medium text-sm text-neutral-800 mb-1">
-                      {isUploading ? 'Uploading assets...' : 'Drag and drop files here, or click to browse'}
+                      {isUploading ? 'Encrypting & uploading...' : 'Drop 3D CAD models here, or browse files'}
                     </p>
-                    <p className="text-xs font-mono text-neutral-400 uppercase tracking-wider">Supported: PNG, JPG, STL, 3MF, OBJ, GLB (Max 50MB)</p>
+                    <p className="text-xs font-mono text-neutral-400 uppercase tracking-wider mt-2">
+                      Accepted: STL, 3MF, OBJ, GLB, PNG, JPG (Up to 50MB)
+                    </p>
                   </div>
 
                   {files.length > 0 && (
-                    <ul className="space-y-2 mt-6">
+                    <div className="space-y-2 mt-4">
+                      <p className="font-mono text-xs uppercase tracking-wider text-neutral-500 font-medium">Uploaded Assets ({files.length})</p>
                       {files.map((file, i) => (
-                        <li
+                        <div
                           key={`${file.name}-${i}`}
-                          className="flex items-center justify-between gap-3 border border-neutral-200/90 bg-white/80 backdrop-blur-md rounded-2xl px-5 py-3.5 text-xs font-mono text-neutral-800 shadow-xs"
+                          className="flex items-center justify-between border border-neutral-200 bg-white rounded-xl px-4 py-3 text-xs font-mono text-neutral-800 shadow-sm hover:border-neutral-300 transition-colors"
                         >
                           <div className="flex items-center gap-3 min-w-0">
                             <FileText className="w-4 h-4 text-amber-600 shrink-0" />
@@ -286,168 +285,178 @@ export default function CustomStudioPage() {
                           <button
                             type="button"
                             onClick={() => handleRemoveFile(i)}
-                            className="p-1 rounded-full text-neutral-400 hover:text-neutral-900 transition-colors shrink-0"
-                            aria-label="Remove file"
+                            className="p-1 rounded-lg text-neutral-400 hover:text-neutral-900 transition-colors shrink-0"
                           >
                             <X className="w-4 h-4" />
                           </button>
-                        </li>
+                        </div>
                       ))}
-                    </ul>
+                    </div>
                   )}
 
                   {failedUploadNotes.length > 0 && (
-                    <div className="mt-6 border border-amber-600/30 bg-amber-500/10 rounded-2xl p-5 text-xs font-mono text-amber-900 shadow-xs">
-                      <p className="font-semibold mb-1">
-                        {failedUploadNotes.length} file{failedUploadNotes.length > 1 ? 's' : ''} saved as description
-                      </p>
-                      <p className="text-neutral-600 font-sans text-xs font-light">
-                        Our engineering team will follow up directly to arrange receiving full CAD files.
-                      </p>
+                    <div className="border border-amber-600/30 bg-amber-500/10 rounded-2xl p-4 text-xs font-mono text-amber-900 flex gap-3 items-start shadow-sm">
+                      <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-semibold mb-0.5">
+                          {failedUploadNotes.length} file annotation{failedUploadNotes.length > 1 ? 's' : ''} logged
+                        </p>
+                        <p className="text-neutral-600 font-sans text-xs font-light">
+                          Our engineering team will handle large file transfer during consultation.
+                        </p>
+                      </div>
                     </div>
                   )}
                 </motion.div>
               )}
-
-              {/* Step 2: Describe */}
               {step === 2 && (
                 <motion.div
                   key="step2"
-                  initial={{ opacity: 0, y: 15 }}
+                  initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -15 }}
-                  transition={{ duration: 0.3 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.2 }}
                   className="space-y-6"
                 >
-                  <div className="border-b border-neutral-200/80 pb-4 mb-6">
-                    <h3 className="font-serif text-2xl md:text-3xl font-normal text-neutral-900">The Concept</h3>
-                    <p className="mt-1 text-neutral-500 font-light text-sm">
-                      Define the purpose and scope of your custom build.
+                  <div className="border-b border-neutral-200/80 pb-6">
+                    <span className="font-mono text-[10px] uppercase tracking-widest text-amber-700 font-semibold">Step 02 / 05</span>
+                    <h3 className="font-serif text-2xl sm:text-3xl font-normal text-neutral-900 mt-1">Project Conceptualization</h3>
+                    <p className="mt-1.5 text-neutral-500 font-light text-sm leading-relaxed">
+                      Provide functional requirements and intended operating environment details.
                     </p>
                   </div>
-                  
+
                   <div>
-                    <label className="block font-mono text-xs uppercase tracking-wider text-neutral-700 mb-2">Project Name</label>
-                    <input 
+                    <label className="block font-mono text-xs uppercase tracking-wider text-neutral-700 mb-2 font-medium">Project Nomenclature</label>
+                    <input
                       required
-                      type="text" 
+                      type="text"
                       name="projectName"
                       value={formData.projectName}
                       onChange={handleChange}
-                      placeholder="e.g. Custom Drone Mount v2"
-                      className="w-full bg-white/80 backdrop-blur-md border border-neutral-200/90 rounded-full px-5 py-3 text-xs font-mono placeholder:text-neutral-400 focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 transition-all shadow-xs"
+                      placeholder="e.g. Ergonomic Enclosure Mk. IV"
+                      className="w-full bg-white border border-neutral-300 rounded-xl px-4 py-3.5 text-xs font-mono text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-neutral-900 focus:ring-2 focus:ring-neutral-900/10 transition-all shadow-sm"
                     />
                   </div>
-                  
+
                   <div>
-                    <label className="block font-mono text-xs uppercase tracking-wider text-neutral-700 mb-2">Describe Your Idea</label>
-                    <textarea 
+                    <label className="block font-mono text-xs uppercase tracking-wider text-neutral-700 mb-2 font-medium">Engineering Brief</label>
+                    <textarea
                       required
                       rows={5}
                       name="description"
                       value={formData.description}
                       onChange={handleChange}
-                      placeholder="What are we building? Detail dimensions, functional stress limits, or target environment."
-                      className="w-full bg-white/80 backdrop-blur-md border border-neutral-200/90 rounded-3xl p-5 text-xs font-mono placeholder:text-neutral-400 focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 transition-all shadow-xs resize-none"
+                      placeholder="Describe target mechanical load, thermal limits, tolerances, or aesthetic standards..."
+                      className="w-full bg-white border border-neutral-300 rounded-2xl p-4 text-xs font-mono text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-neutral-900 focus:ring-2 focus:ring-neutral-900/10 transition-all shadow-sm resize-none"
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
-                      <label className="block font-mono text-xs uppercase tracking-wider text-neutral-700 mb-2">Intended Use</label>
-                      <select 
+                      <label className="block font-mono text-xs uppercase tracking-wider text-neutral-700 mb-2 font-medium">Primary Application</label>
+                      <select
                         name="intendedUse"
                         value={formData.intendedUse}
                         onChange={handleChange}
-                        className="w-full bg-white/80 backdrop-blur-md border border-neutral-200/90 rounded-full px-5 py-3 text-xs font-mono focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 transition-all shadow-xs appearance-none"
+                        className="w-full bg-white border border-neutral-300 rounded-xl px-4 py-3.5 text-xs font-mono text-neutral-900 focus:outline-none focus:border-neutral-900 focus:ring-2 focus:ring-neutral-900/10 transition-all shadow-sm"
                       >
                         <option value="Functional Prototype">Functional Prototype</option>
-                        <option value="Visual Model / Art">Visual Model / Art</option>
-                        <option value="End-use Part">End-use Part</option>
-                        <option value="Not Sure Yet">Not Sure Yet</option>
+                        <option value="Visual Model / Art">Visual Display / Model</option>
+                        <option value="End-use Part">End-Use Production Part</option>
+                        <option value="Not Sure Yet">Engineering Recommendation</option>
                       </select>
                     </div>
 
                     <div>
-                      <label className="block font-mono text-xs uppercase tracking-wider text-neutral-700 mb-2">Quantity</label>
-                      <input 
-                        type="number" 
+                      <label className="block font-mono text-xs uppercase tracking-wider text-neutral-700 mb-2 font-medium">Batch Quantity</label>
+                      <input
+                        type="number"
                         min="1"
                         name="quantity"
                         value={formData.quantity}
                         onChange={handleChange}
-                        className="w-full bg-white/80 backdrop-blur-md border border-neutral-200/90 rounded-full px-5 py-3 text-xs font-mono focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 transition-all shadow-xs"
+                        className="w-full bg-white border border-neutral-300 rounded-xl px-4 py-3.5 text-xs font-mono text-neutral-900 focus:outline-none focus:border-neutral-900 focus:ring-2 focus:ring-neutral-900/10 transition-all shadow-sm"
                       />
                     </div>
                   </div>
                 </motion.div>
               )}
 
-              {/* Step 3: Specifications */}
               {step === 3 && (
                 <motion.div
                   key="step3"
-                  initial={{ opacity: 0, y: 15 }}
+                  initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -15 }}
-                  transition={{ duration: 0.3 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.2 }}
                   className="space-y-6"
                 >
-                  <div className="border-b border-neutral-200/80 pb-4 mb-6">
-                    <h3 className="font-serif text-2xl md:text-3xl font-normal text-neutral-900">Technical Specifications</h3>
-                    <p className="mt-1 text-neutral-500 font-light text-sm">
-                      Select material profiles and finishing requirements.
+                  <div className="border-b border-neutral-200/80 pb-6">
+                    <span className="font-mono text-[10px] uppercase tracking-widest text-amber-700 font-semibold">Step 03 / 05</span>
+                    <h3 className="font-serif text-2xl sm:text-3xl font-normal text-neutral-900 mt-1">Material & Finish Parameters</h3>
+                    <p className="mt-1.5 text-neutral-500 font-light text-sm leading-relaxed">
+                      Select polymer profiles and post-processing treatments.
                     </p>
                   </div>
-                  
-                  {/* Material Pill Selection */}
+
                   <div>
-                    <div className="flex items-center gap-2 mb-3 font-mono text-xs uppercase tracking-wider text-amber-800">
+                    <div className="flex items-center gap-2 mb-3 font-mono text-xs uppercase tracking-wider text-amber-800 font-medium">
                       <Layers className="w-3.5 h-3.5 text-amber-600" />
-                      <span>Preferred Material</span>
+                      <span>Material Formulation</span>
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                      {["PLA+ (Standard)", "PETG (Durable)", "ABS/ASA (Heat Resistant)", "TPU (Flexible)", "Not Sure (Recommend)"].map((mat) => {
-                        const isSelected = formData.preferredMaterial === mat;
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {[
+                        { title: "PLA+ High Precision", desc: "Crisp detail & structural rigidity" },
+                        { title: "PETG Technical Grade", desc: "Impact resistant & weather durable" },
+                        { title: "ABS/ASA Structural", desc: "Heat tolerant & UV stable" },
+                        { title: "TPU Flexible Elastomer", desc: "High shock absorption" },
+                        { title: "Custom Formulation", desc: "Consult engineering team" }
+                      ].map((mat) => {
+                        const isSelected = formData.preferredMaterial === mat.title;
                         return (
                           <button
-                            key={mat}
+                            key={mat.title}
                             type="button"
-                            onClick={() => setFormData({ ...formData, preferredMaterial: mat })}
-                            className={`px-4 py-2 rounded-full border font-mono text-xs uppercase tracking-wider transition-all duration-300 ${
-                              isSelected
-                                ? "border-amber-600/80 bg-neutral-900 text-white shadow-xs"
-                                : "border-neutral-200/90 bg-white/80 text-neutral-600 hover:border-neutral-400 hover:text-neutral-900"
-                            }`}
+                            onClick={() => setFormData({ ...formData, preferredMaterial: mat.title })}
+                            className={`p-4 rounded-2xl border text-left transition-all duration-200 ${isSelected
+                                ? "border-amber-600/80 bg-neutral-900 text-white shadow-md"
+                                : "border-neutral-200 bg-white/90 text-neutral-700 hover:border-neutral-400"
+                              }`}
                           >
-                            {mat}
+                            <p className="font-mono text-xs font-semibold uppercase tracking-wider">{mat.title}</p>
+                            <p className={`text-[11px] font-sans mt-0.5 font-light ${isSelected ? 'text-amber-200/80' : 'text-neutral-400'}`}>{mat.desc}</p>
                           </button>
                         );
                       })}
                     </div>
                   </div>
 
-                  {/* Finish Pill Selection */}
                   <div>
-                    <div className="flex items-center gap-2 mb-3 font-mono text-xs uppercase tracking-wider text-amber-800">
+                    <div className="flex items-center gap-2 mb-3 font-mono text-xs uppercase tracking-wider text-amber-800 font-medium">
                       <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                      <span>Desired Finish</span>
+                      <span>Post-Processing Finish</span>
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                      {["Raw Print (Standard)", "Sanded / Smooth", "Painted (Automotive Grade)", "Premium Clear Coat"].map((fin) => {
-                        const isSelected = formData.desiredFinish === fin;
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {[
+                        { title: "Raw Print (Standard)", desc: "Visible micro-layer lines" },
+                        { title: "Sanded & Smooth", desc: "Hand-finished tactile satin" },
+                        { title: "Automotive Lacquer", desc: "High-gloss coated finish" },
+                        { title: "Matte Protective Coat", desc: "Sealed non-reflective surface" }
+                      ].map((fin) => {
+                        const isSelected = formData.desiredFinish === fin.title;
                         return (
                           <button
-                            key={fin}
+                            key={fin.title}
                             type="button"
-                            onClick={() => setFormData({ ...formData, desiredFinish: fin })}
-                            className={`px-4 py-2 rounded-full border font-mono text-xs uppercase tracking-wider transition-all duration-300 ${
-                              isSelected
-                                ? "border-amber-600/80 bg-neutral-900 text-white shadow-xs"
-                                : "border-neutral-200/90 bg-white/80 text-neutral-600 hover:border-neutral-400 hover:text-neutral-900"
-                            }`}
+                            onClick={() => setFormData({ ...formData, desiredFinish: fin.title })}
+                            className={`p-4 rounded-2xl border text-left transition-all duration-200 ${isSelected
+                                ? "border-amber-600/80 bg-neutral-900 text-white shadow-md"
+                                : "border-neutral-200 bg-white/90 text-neutral-700 hover:border-neutral-400"
+                              }`}
                           >
-                            {fin}
+                            <p className="font-mono text-xs font-semibold uppercase tracking-wider">{fin.title}</p>
+                            <p className={`text-[11px] font-sans mt-0.5 font-light ${isSelected ? 'text-amber-200/80' : 'text-neutral-400'}`}>{fin.desc}</p>
                           </button>
                         );
                       })}
@@ -455,37 +464,37 @@ export default function CustomStudioPage() {
                   </div>
 
                   <div>
-                    <label className="block font-mono text-xs uppercase tracking-wider text-neutral-700 mb-2">Dimensions (Optional)</label>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                      <input 
-                        type="number" 
-                        name="lengthMm" 
-                        value={formData.lengthMm} 
-                        onChange={handleChange} 
-                        placeholder="Length" 
-                        className="bg-white/80 backdrop-blur-md border border-neutral-200/90 rounded-full px-5 py-3 text-xs font-mono focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 transition-all shadow-xs" 
+                    <label className="block font-mono text-xs uppercase tracking-wider text-neutral-700 mb-2 font-medium">Dimensional Constraints (Optional)</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                      <input
+                        type="number"
+                        name="lengthMm"
+                        value={formData.lengthMm}
+                        onChange={handleChange}
+                        placeholder="Length"
+                        className="bg-white border border-neutral-300 rounded-xl px-4 py-3 text-xs font-mono text-neutral-900 focus:outline-none focus:border-neutral-900 shadow-sm"
                       />
-                      <input 
-                        type="number" 
-                        name="widthMm" 
-                        value={formData.widthMm} 
-                        onChange={handleChange} 
-                        placeholder="Width" 
-                        className="bg-white/80 backdrop-blur-md border border-neutral-200/90 rounded-full px-5 py-3 text-xs font-mono focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 transition-all shadow-xs" 
+                      <input
+                        type="number"
+                        name="widthMm"
+                        value={formData.widthMm}
+                        onChange={handleChange}
+                        placeholder="Width"
+                        className="bg-white border border-neutral-300 rounded-xl px-4 py-3 text-xs font-mono text-neutral-900 focus:outline-none focus:border-neutral-900 shadow-sm"
                       />
-                      <input 
-                        type="number" 
-                        name="heightMm" 
-                        value={formData.heightMm} 
-                        onChange={handleChange} 
-                        placeholder="Height" 
-                        className="bg-white/80 backdrop-blur-md border border-neutral-200/90 rounded-full px-5 py-3 text-xs font-mono focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 transition-all shadow-xs" 
+                      <input
+                        type="number"
+                        name="heightMm"
+                        value={formData.heightMm}
+                        onChange={handleChange}
+                        placeholder="Height"
+                        className="bg-white border border-neutral-300 rounded-xl px-4 py-3 text-xs font-mono text-neutral-900 focus:outline-none focus:border-neutral-900 shadow-sm"
                       />
-                      <select 
-                        name="dimensionUnit" 
-                        value={formData.dimensionUnit} 
-                        onChange={handleChange} 
-                        className="bg-white/80 backdrop-blur-md border border-neutral-200/90 rounded-full px-5 py-3 text-xs font-mono focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 transition-all shadow-xs appearance-none"
+                      <select
+                        name="dimensionUnit"
+                        value={formData.dimensionUnit}
+                        onChange={handleChange}
+                        className="bg-white border border-neutral-300 rounded-xl px-4 py-3 text-xs font-mono text-neutral-900 focus:outline-none focus:border-neutral-900 shadow-sm"
                       >
                         <option value="mm">mm</option>
                         <option value="cm">cm</option>
@@ -496,100 +505,95 @@ export default function CustomStudioPage() {
                 </motion.div>
               )}
 
-              {/* Step 4: Contact */}
               {step === 4 && (
                 <motion.div
                   key="step4"
-                  initial={{ opacity: 0, y: 15 }}
+                  initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -15 }}
-                  transition={{ duration: 0.3 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.2 }}
                   className="space-y-6"
                 >
-                  <div className="border-b border-neutral-200/80 pb-4 mb-6">
-                    <h3 className="font-serif text-2xl md:text-3xl font-normal text-neutral-900">Contact Details</h3>
-                    <p className="mt-1 text-neutral-500 font-light text-sm">
-                      Where should our engineering team deliver your preliminary estimate?
+                  <div className="border-b border-neutral-200/80 pb-6">
+                    <span className="font-mono text-[10px] uppercase tracking-widest text-amber-700 font-semibold">Step 04 / 05</span>
+                    <h3 className="font-serif text-2xl sm:text-3xl font-normal text-neutral-900 mt-1">Client Routing & Contact</h3>
+                    <p className="mt-1.5 text-neutral-500 font-light text-sm leading-relaxed">
+                      Details for transmission of technical estimates and production schedules.
                     </p>
                   </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="md:col-span-2">
-                      <label className="block font-mono text-xs uppercase tracking-wider text-neutral-700 mb-2">Full Name</label>
-                      <input 
-                        required 
-                        type="text" 
-                        name="fullName" 
-                        value={formData.fullName} 
+                      <label className="block font-mono text-xs uppercase tracking-wider text-neutral-700 mb-2 font-medium">Full Name</label>
+                      <input
+                        required
+                        type="text"
+                        name="fullName"
+                        value={formData.fullName}
                         onChange={handleChange}
-                        placeholder="Your full name"
-                        className="w-full bg-white/80 backdrop-blur-md border border-neutral-200/90 rounded-full px-5 py-3 text-xs font-mono focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 transition-all shadow-xs"
+                        placeholder="e.g. John Doe"
+                        className="w-full bg-white border border-neutral-300 rounded-xl px-4 py-3.5 text-xs font-mono text-neutral-900 focus:outline-none focus:border-neutral-900 shadow-sm"
                       />
                     </div>
                     <div>
-                      <label className="block font-mono text-xs uppercase tracking-wider text-neutral-700 mb-2">Email Address</label>
-                      <input 
-                        required 
-                        type="email" 
-                        name="email" 
-                        value={formData.email} 
+                      <label className="block font-mono text-xs uppercase tracking-wider text-neutral-700 mb-2 font-medium">Corporate or Personal Email</label>
+                      <input
+                        required
+                        type="email"
+                        name="email"
+                        value={formData.email}
                         onChange={handleChange}
-                        placeholder="your@example.com"
-                        className="w-full bg-white/80 backdrop-blur-md border border-neutral-200/90 rounded-full px-5 py-3 text-xs font-mono focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 transition-all shadow-xs"
+                        placeholder="john@example.com"
+                        className="w-full bg-white border border-neutral-300 rounded-xl px-4 py-3.5 text-xs font-mono text-neutral-900 focus:outline-none focus:border-neutral-900 shadow-sm"
                       />
                     </div>
                     <div>
-                      <label className="block font-mono text-xs uppercase tracking-wider text-neutral-700 mb-2">Phone Number</label>
-                      <input 
-                        type="tel" 
-                        name="phone" 
-                        value={formData.phone} 
+                      <label className="block font-mono text-xs uppercase tracking-wider text-neutral-700 mb-2 font-medium">Direct Phone Line</label>
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
                         onChange={handleChange}
-                        placeholder="+977 9800000000"
-                        className="w-full bg-white/80 backdrop-blur-md border border-neutral-200/90 rounded-full px-5 py-3 text-xs font-mono focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 transition-all shadow-xs"
+                        placeholder="+1 (555) 000-0000"
+                        className="w-full bg-white border border-neutral-300 rounded-xl px-4 py-3.5 text-xs font-mono text-neutral-900 focus:outline-none focus:border-neutral-900 shadow-sm"
                       />
                     </div>
                   </div>
                 </motion.div>
               )}
 
-              {/* Step 5: Review */}
               {step === 5 && (
                 <motion.div
                   key="step5"
-                  initial={{ opacity: 0, y: 15 }}
+                  initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -15 }}
-                  transition={{ duration: 0.3 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.2 }}
                   className="space-y-6"
                 >
-                  <div className="border-b border-neutral-200/80 pb-4 mb-6">
-                    <h3 className="font-serif text-2xl md:text-3xl font-normal text-neutral-900">Review Submission</h3>
-                    <p className="mt-1 text-neutral-500 font-light text-sm">
-                      Confirm specifications before routing to the workshop.
+                  <div className="border-b border-neutral-200/80 pb-6">
+                    <span className="font-mono text-[10px] uppercase tracking-widest text-amber-700 font-semibold">Step 05 / 05</span>
+                    <h3 className="font-serif text-2xl sm:text-3xl font-normal text-neutral-900 mt-1">Final Verification</h3>
+                    <p className="mt-1.5 text-neutral-500 font-light text-sm leading-relaxed">
+                      Confirm specifications prior to dispatching to the manufacturing workspace.
                     </p>
                   </div>
-                  
+
                   <div className="space-y-3 font-mono text-xs">
-                    <div className="flex flex-col sm:flex-row justify-between p-4 rounded-2xl border border-neutral-200/90 bg-white/80 backdrop-blur-md shadow-xs">
-                      <span className="text-neutral-400 uppercase">Project Name</span>
-                      <span className="text-neutral-900 font-semibold">{formData.projectName || "Not specified"}</span>
+                    <div className="flex flex-col sm:flex-row justify-between p-4 rounded-2xl border border-neutral-200 bg-white/90 shadow-sm">
+                      <span className="text-neutral-400 uppercase tracking-wider">Project Title</span>
+                      <span className="text-neutral-900 font-semibold">{formData.projectName || "Unnamed Build"}</span>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row justify-between p-4 rounded-2xl border border-neutral-200/90 bg-white/80 backdrop-blur-md shadow-xs">
-                      <span className="text-neutral-400 uppercase">Description</span>
-                      <span className="text-neutral-900 font-light max-w-sm text-right">{formData.description || "Not specified"}</span>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row justify-between p-4 rounded-2xl border border-neutral-200/90 bg-white/80 backdrop-blur-md shadow-xs">
-                      <span className="text-neutral-400 uppercase">Specifications</span>
-                      <span className="text-neutral-900 font-semibold text-right">
+                    <div className="flex flex-col sm:flex-row justify-between p-4 rounded-2xl border border-neutral-200 bg-white/90 shadow-sm">
+                      <span className="text-neutral-400 uppercase tracking-wider">Specifications</span>
+                      <span className="text-amber-800 font-semibold text-right">
                         {formData.preferredMaterial} • {formData.desiredFinish} • Qty: {formData.quantity}
                       </span>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row justify-between p-4 rounded-2xl border border-neutral-200/90 bg-white/80 backdrop-blur-md shadow-xs">
-                      <span className="text-neutral-400 uppercase">Contact</span>
+                    <div className="flex flex-col sm:flex-row justify-between p-4 rounded-2xl border border-neutral-200 bg-white/90 shadow-sm">
+                      <span className="text-neutral-400 uppercase tracking-wider">Contact Target</span>
                       <span className="text-neutral-900 font-semibold text-right">
                         {formData.fullName} ({formData.email})
                       </span>
@@ -599,24 +603,24 @@ export default function CustomStudioPage() {
               )}
             </AnimatePresence>
 
-            {/* Navigation Bar */}
-            <div className="mt-12 flex justify-between items-center pt-6 border-t border-neutral-200/80">
+            {/* Form Controls */}
+            <div className="mt-10 flex justify-between items-center pt-6 border-t border-neutral-200/80">
               {step > 1 ? (
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={handlePrev}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-neutral-200/90 bg-white/80 text-neutral-700 font-mono text-xs uppercase tracking-wider hover:border-neutral-400 transition-colors shadow-xs"
+                  className="flex items-center gap-2 px-6 py-3 rounded-2xl border border-neutral-300 bg-white text-neutral-800 font-mono text-xs uppercase tracking-wider hover:bg-neutral-100 transition-colors shadow-sm"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" /> Back
                 </button>
               ) : <div />}
-              
-              <button 
+
+              <button
                 type="submit"
                 disabled={createOrder.isPending}
-                className="flex items-center gap-2 px-8 py-3 rounded-full bg-neutral-900 text-white font-mono text-xs uppercase tracking-widest hover:bg-amber-600 transition-colors shadow-xs disabled:opacity-50"
+                className="flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-neutral-900 text-white font-mono text-xs uppercase tracking-widest hover:bg-amber-600 transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50"
               >
-                <span>{step === totalSteps ? (createOrder.isPending ? 'Submitting...' : 'Submit Request') : 'Continue'}</span>
+                <span>{step === totalSteps ? (createOrder.isPending ? 'Transmitting...' : 'Submit Specs') : 'Continue'}</span>
                 {step !== totalSteps && <ChevronRight className="w-3.5 h-3.5" />}
               </button>
             </div>
@@ -625,34 +629,38 @@ export default function CustomStudioPage() {
       </div>
 
       <Dialog open={failedUploadOpen} onOpenChange={setFailedUploadOpen}>
-        <DialogContent className="rounded-3xl border border-neutral-200/90 bg-white/95 backdrop-blur-xl p-6 md:p-8">
+        <DialogContent className="rounded-3xl border border-neutral-200 bg-white/95 backdrop-blur-2xl p-6 sm:p-8">
           <DialogHeader>
-            <DialogTitle className="font-serif text-2xl font-normal text-neutral-900">We couldn't upload that file</DialogTitle>
+            <DialogTitle className="font-serif text-2xl font-normal text-neutral-900">Alternative File Transfer</DialogTitle>
             <DialogDescription className="text-neutral-500 font-light text-xs mt-2">
-              "{failedUploadFileName}" exceeds direct upload limits. Describe what you're looking to manufacture below and our engineers will collect the file directly.
+              "{failedUploadFileName}" is larger than standard transfer limits. Describe your project specs below for direct workshop pickup.
             </DialogDescription>
           </DialogHeader>
-          <textarea
-            rows={4}
-            value={failedUploadDescription}
-            onChange={(e) => setFailedUploadDescription(e.target.value)}
-            className="w-full border border-neutral-200/90 bg-neutral-50 rounded-2xl p-4 text-xs font-mono focus:outline-none focus:border-amber-600 transition-colors mt-2"
-            placeholder="e.g. 12cm tall high-detail dragon figurine STL..."
-          />
-          <DialogFooter className="mt-4 flex gap-2">
+
+          <div className="py-3">
+            <textarea
+              rows={4}
+              value={failedUploadDescription}
+              onChange={(e) => setFailedUploadDescription(e.target.value)}
+              placeholder="e.g. 15cm functional bracket with high wall density..."
+              className="w-full bg-white border border-neutral-300 rounded-2xl p-4 text-xs font-mono text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-neutral-900 transition-all resize-none shadow-sm"
+            />
+          </div>
+
+          <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 sm:justify-end">
             <button
               type="button"
               onClick={() => setFailedUploadOpen(false)}
-              className="px-5 py-2 rounded-full font-mono text-xs uppercase tracking-wider text-neutral-500 hover:text-neutral-900"
+              className="px-5 py-2.5 rounded-2xl border border-neutral-300 bg-white text-neutral-700 font-mono text-xs uppercase tracking-wider hover:bg-neutral-100 transition-colors"
             >
               Skip
             </button>
             <button
               type="button"
               onClick={handleSaveFailedUploadNote}
-              className="px-6 py-2 rounded-full bg-neutral-900 text-white font-mono text-xs uppercase tracking-wider hover:bg-amber-600 transition-colors shadow-xs"
+              className="px-6 py-2.5 rounded-2xl bg-neutral-900 text-white font-mono text-xs uppercase tracking-wider hover:bg-amber-600 transition-all shadow-sm"
             >
-              Save & Continue
+              Save Note
             </button>
           </DialogFooter>
         </DialogContent>

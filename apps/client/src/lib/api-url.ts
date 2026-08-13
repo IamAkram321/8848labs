@@ -1,15 +1,7 @@
-export const API_URL = import.meta.env.VITE_API_URL || '';
+export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 /**
- * Uploads files to /api/uploads with a hard timeout. Without this, a stalled
- * connection (slow network, a proxy silently dropping a long-running
- * request, etc.) leaves the UI stuck on "Uploading..." forever with no way
- * to recover, since a plain fetch() never resolves or rejects on its own if
- * the server never responds and the connection doesn't cleanly close.
- *
- * Large 3D model files can legitimately take a while on a slow connection —
- * this timeout is intentionally generous (3 minutes) so it only fires for
- * genuinely stuck uploads, not merely slow ones.
+ * Uploads files to /api/uploads with a hard timeout.
  */
 export async function uploadFilesWithTimeout(
   files: File[],

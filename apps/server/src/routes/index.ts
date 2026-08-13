@@ -13,6 +13,7 @@ import testimonialsRouter from "./testimonials";
 import statsRouter from "./stats";
 import authRouter from "./auth";
 import adminRouter from "./admin";
+import paymentRouter from "./payment";
 
 const router = Router();
 
@@ -26,6 +27,7 @@ router.use(projectsRouter);
 router.use(customOrdersRouter);
 router.use(cartRouter);
 router.use(ordersRouter);
+router.use(paymentRouter);
 router.use(uploadsRouter);
 router.use(reviewsRouter);
 router.use(testimonialsRouter);
