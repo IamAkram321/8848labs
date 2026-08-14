@@ -42,16 +42,20 @@ app.use(
   })
 );
 
-const envOrigins = process.env.FRONTEND_URL
-  ? process.env.FRONTEND_URL.split(",")
+// 1. Get origins from optional ALLOWED_ORIGINS env variable
+const customAllowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",")
       .map((url) => url.trim().replace(/\/$/, ""))
       .filter(Boolean)
   : [];
 
+// 2. Combine defaults + FRONTEND_URL + Vercel deployment + custom origins
 const allowedOrigins = [
   "http://localhost:5173",
   "https://8848labs.pathaksons.com",
-  ...envOrigins,
+  "https://8848labs-8848labs.vercel.app",
+  ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL.trim().replace(/\/$/, "")] : []),
+  ...customAllowedOrigins,
 ];
 
 app.use(
@@ -65,7 +69,6 @@ app.use(
       if (allowedOrigins.includes(normalizedOrigin)) {
         callback(null, true);
       } else {
-        // Return false instead of instantiating an Error object
         callback(null, false);
       }
     },
