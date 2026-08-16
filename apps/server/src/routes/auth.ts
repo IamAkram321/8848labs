@@ -17,24 +17,16 @@ import { signupLimiter, loginLimiter, forgotPasswordLimiter, resetPasswordLimite
 const router = Router();
 
 function getBackendURL(): string {
-  const rawUrl = process.env.BACKEND_URL || "http://localhost:8080";
+  const rawUrl = process.env.BACKEND_URL || "http://localhost:3000";
   return rawUrl.trim().replace(/\/$/, "");
 }
 
-/**
- * Returns the primary frontend URL configured in environment variables.
- * Used for OAuth redirects to guarantee external providers never supply the destination domain.
- */
 function getFrontendURL(): string {
   const rawUrl = process.env.FRONTEND_URL || "http://localhost:5173";
   const firstUrl = rawUrl.split(",")[0].trim();
   return firstUrl.replace(/\/$/, "");
 }
 
-/**
- * Dynamically resolves the origin for general API requests (e.g. email links).
- * Filters out external auth providers like google.com.
- */
 function getRequestOrigin(req: Request): string {
   const origin = req.headers.origin || (req.headers.referer ? new URL(req.headers.referer).origin : null);
 
@@ -46,10 +38,12 @@ function getRequestOrigin(req: Request): string {
 }
 
 function getCallbackURL(): string {
+  if (process.env.GOOGLE_CALLBACK_URL) {
+    return process.env.GOOGLE_CALLBACK_URL.trim();
+  }
   return `${getBackendURL()}/api/auth/google/callback`;
 }
 
-// Setup Google OAuth strategy if keys are present
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
   passport.use(
     new GoogleStrategy(
@@ -57,11 +51,13 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         callbackURL: getCallbackURL(),
+        passReqToCallback: false,
+        proxy: true,
       },
       async (_accessToken, _refreshToken, profile, done) => {
         try {
           const email = profile.emails?.[0]?.value;
-          if (!email) return done(new Error("No email from Google profile"));
+          if (!email) return done(null, false, { message: "No email provided by Google profile" });
 
           const existing = await db
             .select()
@@ -72,7 +68,6 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
           let user = existing[0];
 
           if (!user) {
-            // Check if user already registered via email to link their Google profile
             const byEmail = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
 
             if (byEmail[0]) {
@@ -112,6 +107,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 
           return done(null, user);
         } catch (err) {
+          console.error("[passport/google] Strategy verification error:", err);
           return done(err as Error);
         }
       }
@@ -149,44 +145,58 @@ router.get(
   "/auth/google",
   (req: Request, res: Response, next: NextFunction): void => {
     if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-      res.status(503).json({ error: "Google OAuth not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET." });
+      res.status(503).json({ error: "Google OAuth not configured." });
       return;
     }
-    next();
-  },
-  passport.authenticate("google", { scope: ["profile", "email"] })
+
+    passport.authenticate("google", {
+      scope: ["profile", "email"],
+      callbackURL: getCallbackURL(),
+    } as passport.AuthenticateOptions & { callbackURL?: string })(req, res, next);
+  }
 );
 
 router.get(
   "/auth/google/callback",
-  passport.authenticate("google", { failureRedirect: `${getFrontendURL()}/?auth=failed` }),
-  (req: Request, res: Response): void => {
-    const user = req.user as { id: number; role: string } | undefined;
-    const frontendUrl = getFrontendURL();
+  (req: Request, res: Response, next: NextFunction) => {
+    passport.authenticate(
+      "google",
+      { callbackURL: getCallbackURL() } as passport.AuthenticateOptions & { callbackURL?: string },
+      (err: any, user: any) => {
+        const frontendUrl = getFrontendURL();
 
-    if (!user) {
-      res.redirect(`${frontendUrl}/?auth=failed`);
-      return;
-    }
+        if (err || !user) {
+          console.error("[auth/google/callback] Authentication failed:", err);
+          res.redirect(`${frontendUrl}/?auth=failed`);
+          return;
+        }
 
-    req.session.userId = user.id;
-    req.session.userRole = user.role;
+        req.logIn(user, (loginErr) => {
+          if (loginErr) {
+            console.error("[auth/google/callback] req.logIn error:", loginErr);
+            res.redirect(`${frontendUrl}/?auth=failed`);
+            return;
+          }
 
-    // Explicitly save the session to PostgreSQL before redirecting
-    req.session.save((err) => {
-      if (err) {
-        console.error("[auth/google/callback] Session save failed:", err);
-        res.redirect(`${frontendUrl}/?auth=failed`);
-        return;
+          req.session.userId = user.id;
+          req.session.userRole = user.role;
+
+          req.session.save((saveErr) => {
+            if (saveErr) {
+              console.error("[auth/google/callback] Session save failed:", saveErr);
+              res.redirect(`${frontendUrl}/?auth=failed`);
+              return;
+            }
+
+            const dest = user.role === "ADMIN" ? `${frontendUrl}/admin` : `${frontendUrl}/`;
+            res.redirect(dest);
+          });
+        });
       }
-
-      const dest = user.role === "ADMIN" ? `${frontendUrl}/admin` : `${frontendUrl}/`;
-      res.redirect(dest);
-    });
+    )(req, res, next);
   }
 );
 
-// Account security parameters
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_DURATION_MS = 15 * 60 * 1000;
@@ -194,7 +204,6 @@ const CAPTCHA_REQUIRED_AFTER_ATTEMPTS = 3;
 
 const GENERIC_LOGIN_ERROR = "Invalid email or password.";
 
-/** POST /api/auth/signup */
 router.post("/auth/signup", signupLimiter, async (req: Request, res: Response): Promise<void> => {
   try {
     const body = req.body as Record<string, unknown>;
@@ -250,7 +259,6 @@ router.post("/auth/signup", signupLimiter, async (req: Request, res: Response): 
   }
 });
 
-/** GET /api/auth/verify-email?token=... */
 router.get("/auth/verify-email", async (req: Request, res: Response): Promise<void> => {
   const rawToken = typeof req.query.token === "string" ? req.query.token : "";
 
@@ -289,7 +297,6 @@ router.get("/auth/verify-email", async (req: Request, res: Response): Promise<vo
   }
 });
 
-/** POST /api/auth/login */
 router.post("/auth/login", loginLimiter, async (req: Request, res: Response): Promise<void> => {
   try {
     const body = req.body as Record<string, unknown>;
@@ -372,7 +379,6 @@ router.post("/auth/login", loginLimiter, async (req: Request, res: Response): Pr
   }
 });
 
-/** POST /api/auth/forgot-password */
 router.post("/auth/forgot-password", forgotPasswordLimiter, async (req: Request, res: Response): Promise<void> => {
   try {
     const body = req.body as Record<string, unknown>;
@@ -409,7 +415,6 @@ router.post("/auth/forgot-password", forgotPasswordLimiter, async (req: Request,
   }
 });
 
-/** POST /api/auth/reset-password */
 router.post("/auth/reset-password", resetPasswordLimiter, async (req: Request, res: Response): Promise<void> => {
   try {
     const body = req.body as Record<string, unknown>;
@@ -464,7 +469,6 @@ router.post("/auth/reset-password", resetPasswordLimiter, async (req: Request, r
   }
 });
 
-/** GET /api/auth/me */
 router.get("/auth/me", async (req: Request, res: Response): Promise<void> => {
   if (!req.session?.userId) { res.status(401).json({ user: null }); return; }
   try {
@@ -482,10 +486,10 @@ router.get("/auth/me", async (req: Request, res: Response): Promise<void> => {
   }
 });
 
-/** POST /api/auth/logout */
 router.post("/auth/logout", (req: Request, res: Response): void => {
   req.session.destroy(() => {
-    res.clearCookie("connect.sid");
+    const cookieDomain = process.env.COOKIE_DOMAIN || (process.env.NODE_ENV === "production" ? ".pathaksons.com" : undefined);
+    res.clearCookie("connect.sid", { path: "/", domain: cookieDomain });
     res.json({ success: true });
   });
 });

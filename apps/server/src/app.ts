@@ -42,14 +42,12 @@ app.use(
   })
 );
 
-// 1. Get origins from optional ALLOWED_ORIGINS env variable
 const customAllowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",")
       .map((url) => url.trim().replace(/\/$/, ""))
       .filter(Boolean)
   : [];
 
-// 2. Combine defaults + FRONTEND_URL + Vercel deployment + custom origins
 const allowedOrigins = [
   "http://localhost:5173",
   "https://8848labs.pathaksons.com",
@@ -61,7 +59,6 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow server-to-server, Postman, or local curl without origin header
       if (!origin) return callback(null, true);
 
       const normalizedOrigin = origin.trim().replace(/\/$/, "");
@@ -84,6 +81,11 @@ app.use(cookieParser());
 
 const PgSession = connectPgSimple(session);
 
+const isProduction = process.env.NODE_ENV === "production";
+const cookieDomain = process.env.COOKIE_DOMAIN !== undefined 
+  ? (process.env.COOKIE_DOMAIN || undefined)
+  : (isProduction ? ".pathaksons.com" : undefined);
+
 app.use(
   session({
     store: new PgSession({
@@ -102,9 +104,9 @@ app.use(
 
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "lax" : "lax",
-      domain: process.env.NODE_ENV === "production" ? ".pathaksons.com" : undefined,
+      secure: isProduction,
+      sameSite: isProduction ? "lax" : "lax",
+      domain: cookieDomain,
       maxAge: 7 * 24 * 60 * 60 * 1000,
       path: "/",
     },
