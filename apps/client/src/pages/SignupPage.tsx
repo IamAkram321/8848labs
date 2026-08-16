@@ -4,6 +4,7 @@ import ReCAPTCHA from 'react-google-recaptcha';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { API_URL } from '@/lib/api-url';
+import { Eye, EyeOff, CheckCircle2, ArrowRight, ShieldCheck, Mail } from 'lucide-react';
 
 const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY as string | undefined;
 
@@ -26,6 +27,8 @@ export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const captchaRef = useRef<ReCAPTCHA>(null);
@@ -70,8 +73,6 @@ export default function SignupPage() {
         return;
       }
 
-      // Same message and same screen regardless of whether this email was
-      // actually new — this page never learns which case it was.
       setSubmitted(true);
     } catch {
       toast({ title: 'Something went wrong. Please try again.', variant: 'destructive' });
@@ -82,17 +83,22 @@ export default function SignupPage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background px-6 text-center">
-        <div className="w-full max-w-sm">
-          <Link href="/" className="flex items-center justify-center mb-8">
-            <img src="/logo.jpeg" alt="8848LABS" className="h-16 w-auto" />
-          </Link>
-          <h1 className="text-2xl font-serif text-foreground mb-4">Check your email</h1>
-          <p className="text-muted-foreground">
-            If that email address is available, we've sent instructions to confirm your account. Follow the link in that email to finish setting up.
-          </p>
-          <Link href="/login" className="inline-block mt-8 text-sm text-primary hover:underline">
-            Back to sign in
+      <div className="min-h-screen flex items-center justify-center bg-background px-6">
+        <div className="w-full max-w-md text-center bg-card border border-border p-8 rounded-2xl shadow-xl space-y-6">
+          <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+            <Mail className="w-8 h-8" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">Check your inbox</h1>
+            <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+              If that email address is available, we've sent instructions to confirm your account. Follow the link inside to finish setup.
+            </p>
+          </div>
+          <Link
+            href="/login"
+            className="inline-flex items-center justify-center w-full py-3 px-4 bg-primary text-primary-foreground font-medium rounded-xl hover:opacity-90 transition-all shadow-md gap-2"
+          >
+            Back to Sign In <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </div>
@@ -100,103 +106,182 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-6 py-16">
-      <div className="w-full max-w-sm">
-        <Link href="/" className="flex items-center justify-center mb-8">
-          <img src="/logo.jpeg" alt="8848LABS" className="h-16 w-auto" />
-        </Link>
-
-        <h1 className="text-3xl font-serif text-foreground mb-2 text-center">Create an account</h1>
-        <p className="text-muted-foreground mb-8 text-center">
-          Join to track orders and manage your custom projects.
-        </p>
-
-        <form onSubmit={handleSubmit} className="space-y-4 mb-6">
-          <div>
-            <label className="block text-sm font-medium mb-1.5">Full Name</label>
-            <input
-              type="text"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full border border-border bg-card px-4 py-2.5 text-sm rounded-lg focus:outline-none focus:border-primary transition-colors"
-              placeholder="Your name"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1.5">Email</label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-border bg-card px-4 py-2.5 text-sm rounded-lg focus:outline-none focus:border-primary transition-colors"
-              placeholder="you@example.com"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1.5">Password</label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-border bg-card px-4 py-2.5 text-sm rounded-lg focus:outline-none focus:border-primary transition-colors"
-              placeholder="At least 8 characters"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1.5">Confirm Password</label>
-            <input
-              type="password"
-              required
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full border border-border bg-card px-4 py-2.5 text-sm rounded-lg focus:outline-none focus:border-primary transition-colors"
-              placeholder="••••••••"
-            />
-          </div>
-
-          {RECAPTCHA_SITE_KEY && (
-            <div className="flex justify-center pt-1">
-              <ReCAPTCHA ref={captchaRef} sitekey={RECAPTCHA_SITE_KEY} />
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-foreground text-background py-3 rounded-lg text-sm font-medium hover:bg-primary transition-colors disabled:opacity-60"
-          >
-            {isSubmitting ? 'Creating account...' : 'Create Account'}
-          </button>
-        </form>
-
-        <p className="text-sm text-center text-muted-foreground mb-6">
-          Already have an account?{' '}
-          <Link href="/login" className="text-primary hover:underline font-medium">
-            Sign in
+    <div className="min-h-screen w-full flex bg-background">
+      {/* Left Column: Brand & Visual Panel (Hidden on small screens) */}
+      <div className="hidden lg:flex flex-col justify-between w-1/2 bg-muted/40 border-r border-border p-12 relative overflow-hidden">
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="relative z-10">
+          <Link href="/">
+            <img src="/logo.jpeg" alt="8848LABS" className="h-12 w-auto rounded-lg shadow-sm hover:opacity-90 transition-opacity" />
           </Link>
-        </p>
+        </div>
 
-        <div className="relative mb-6">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-border" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase tracking-wider">
-            <span className="bg-background px-3 text-muted-foreground">Or</span>
+        <div className="relative z-10 my-auto space-y-6 max-w-lg">
+          <h2 className="text-4xl font-extrabold tracking-tight text-foreground leading-tight">
+            Crafting custom 3D lithophanes and precision engineering.
+          </h2>
+          <p className="text-muted-foreground text-lg leading-relaxed">
+            Create an account to manage your customized orders, track live updates, and save project blueprints effortlessly.
+          </p>
+
+          <div className="space-y-3 pt-4">
+            <div className="flex items-center gap-3 text-sm text-foreground">
+              <CheckCircle2 className="w-5 h-5 text-primary" />
+              <span>Real-time order status tracking</span>
+            </div>
+            <div className="flex items-center gap-3 text-sm text-foreground">
+              <CheckCircle2 className="w-5 h-5 text-primary" />
+              <span>Dedicated customer support and design reviews</span>
+            </div>
+            <div className="flex items-center gap-3 text-sm text-foreground">
+              <CheckCircle2 className="w-5 h-5 text-primary" />
+              <span>Secure, encrypted checkout & account management</span>
+            </div>
           </div>
         </div>
 
-        <button
-          onClick={() => {
-            window.location.href = `${API_URL}/api/auth/google`;
-          }}
-          className="w-full flex items-center justify-center gap-3 rounded-lg border border-border bg-card px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-        >
-          <GoogleIcon />
-          Continue with Google
-        </button>
+        <div className="relative z-10 flex items-center gap-2 text-xs text-muted-foreground">
+          <ShieldCheck className="w-4 h-4 text-primary" />
+          <span>Protected by reCAPTCHA and end-to-end security</span>
+        </div>
+      </div>
+
+      {/* Right Column: Interactive Form Panel */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center px-6 py-12 sm:px-12">
+        <div className="w-full max-w-md space-y-8">
+          
+          {/* Mobile Logo Header */}
+          <div className="flex lg:hidden justify-center mb-6">
+            <Link href="/">
+              <img src="/logo.jpeg" alt="8848LABS" className="h-14 w-auto rounded-lg" />
+            </Link>
+          </div>
+
+          <div className="text-center lg:text-left space-y-2">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Create an account</h1>
+            <p className="text-muted-foreground text-sm">
+              Get started with 8848LABS to track and order your custom builds.
+            </p>
+          </div>
+
+          {/* Social Sign In */}
+          <button
+            type="button"
+            onClick={() => {
+              window.location.href = `${API_URL}/api/auth/google`;
+            }}
+            className="w-full flex items-center justify-center gap-3 rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium text-foreground transition-all hover:bg-muted hover:border-muted-foreground/30 shadow-sm"
+          >
+            <GoogleIcon />
+            Continue with Google
+          </button>
+
+          <div className="relative flex items-center justify-center">
+            <div className="w-full border-t border-border" />
+            <span className="bg-background px-4 text-xs uppercase tracking-wider text-muted-foreground absolute">
+              Or continue with email
+            </span>
+          </div>
+
+          {/* Signup Form */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1">
+              <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
+                Full Name
+              </label>
+              <input
+                type="text"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full border border-border bg-card px-4 py-3 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                placeholder="John Doe"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
+                Email Address
+              </label>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full border border-border bg-card px-4 py-3 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                placeholder="you@example.com"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full border border-border bg-card pl-4 pr-10 py-3 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                  placeholder="At least 8 characters"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
+                Confirm Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full border border-border bg-card pl-4 pr-10 py-3 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            {RECAPTCHA_SITE_KEY && (
+              <div className="flex justify-center pt-2">
+                <ReCAPTCHA ref={captchaRef} sitekey={RECAPTCHA_SITE_KEY} />
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full bg-primary text-primary-foreground py-3.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-all shadow-md hover:shadow-lg disabled:opacity-60 flex items-center justify-center gap-2 mt-2"
+            >
+              {isSubmitting ? 'Creating account...' : 'Create Account'}
+            </button>
+          </form>
+
+          <p className="text-sm text-center text-muted-foreground">
+            Already have an account?{' '}
+            <Link href="/login" className="text-primary hover:underline font-semibold">
+              Sign in
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
