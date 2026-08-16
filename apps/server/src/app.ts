@@ -103,7 +103,8 @@ app.use(
     cookie: {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      sameSite: process.env.NODE_ENV === "production" ? "lax" : "lax",
+      domain: process.env.NODE_ENV === "production" ? ".pathaksons.com" : undefined,
       maxAge: 7 * 24 * 60 * 60 * 1000,
       path: "/",
     },
